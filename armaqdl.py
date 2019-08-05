@@ -67,12 +67,10 @@ def open_last_rpt():
 def build_mod(path):
     for build_tool, info in BUILD_TOOLS.items():
         req_file, subprogram, cmd = info
-        print(req_file, subprogram, cmd)
 
         if os.path.exists(os.path.join(path, req_file)):
             print("=> Building [{}]".format(build_tool))
             cmd = os.path.join(path, cmd)
-            print(subprogram, cmd)
             subprocess.run([subprogram, cmd])
             print()
             return True
