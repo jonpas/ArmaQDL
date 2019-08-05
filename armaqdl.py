@@ -196,7 +196,7 @@ def main():
     parser.add_argument("-f", "--fullscreen", action="store_true")
 
     parser.add_argument("-b", "--build", action="store_true", help="build development mods")
-    parser.add_argument("-l", "--log", action="store_true", help="open last RPT")
+    parser.add_argument("-nl", "--no-log", action="store_true", help="don't open last log")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
 
@@ -227,7 +227,7 @@ def main():
     print()
 
     # Open log file
-    if args.log:
+    if not args.no_log:
         print("Opening last log in {}s ...".format(OPEN_LOG_DELAY))
         t = threading.Thread(target=open_last_rpt)
         t.start()
