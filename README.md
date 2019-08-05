@@ -2,6 +2,8 @@
 
 Python program for quick launching various mod developement configurations for Arma through a simple CLI.
 
+Through easily-identifiable preset locations, program is able to provide a fast and developer-friendly CLI with some additional optional features, such as building mods and opening last log file. It is designed around easily modifiable location groups and build tools.
+
 ## Features
 
 - Easy mod launching from different preset locations
@@ -22,6 +24,8 @@ $ armaqdl.py -m p:x\cba workshop:@ace dev:acre2 -b -l -m Soldier:test.vr
 ## Usage
 
 Download `armaqdl.py` and modify `CONFIGURATION` section on top of the file to your needs.
+
+It is advisable to add the program to `PATH` environmental variable for use from anywhere.
 
 ```
 $ armaqdl.py -h
