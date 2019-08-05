@@ -5,6 +5,8 @@ import os
 import argparse
 import subprocess
 import glob
+import threading
+import time
 
 if os.name == "nt":
     import winreg
@@ -24,6 +26,8 @@ BUILD_TOOLS = {
     "Mikero": [r"tools\build.py", "python", r"tools\build.py"],
     "Make": ["Makefile", "", "make -j4"]
 }
+
+OPEN_LOG_DELAY = 3
 # CONFIGURATION END #
 
 VERBOSE = False
@@ -53,7 +57,7 @@ def find_arma():
 
 
 def open_last_rpt():
-    # TODO Start delayed
+    time.sleep(OPEN_LOG_DELAY)
     rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
     rpt_list = glob.glob("{}/*.rpt".format(rpt_path))
     last_rpt = max(rpt_list, key=os.path.getctime)
@@ -172,9 +176,9 @@ def run_arma(arma_path, params):
     process_cmd = [arma_path] + params
 
     if VERBOSE:
-        print("\nProcess command: {}".format(process_cmd))
+        print("Process command: {}".format(process_cmd))
 
-    print("\nRunning ...")
+    print("Running ...")
     subprocess.run(process_cmd)
 
 
@@ -192,7 +196,7 @@ def main():
     parser.add_argument("-f", "--fullscreen", action="store_true")
 
     parser.add_argument("-b", "--build", action="store_true", help="build development mods")
-    parser.add_argument("-l", "--log", action="store_true", help="log output")  # TODO (RPT ?)
+    parser.add_argument("-l", "--log", action="store_true", help="open last RPT")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
 
@@ -220,9 +224,13 @@ def main():
     # Flags
     param_flags = process_flags(args)
 
+    print()
+
     # Open log file
     if args.log:
-        open_last_rpt()
+        print("Opening last log in {}s ...".format(OPEN_LOG_DELAY))
+        t = threading.Thread(target=open_last_rpt)
+        t.start()
 
     # Run
     params = param_flags
