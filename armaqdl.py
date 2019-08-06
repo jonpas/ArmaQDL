@@ -138,8 +138,8 @@ def process_mission(mission, profile):
             path = os.path.join(mission, "mission.sqm")
     else:
         # Profile path
-        sqm = os.path.join("Documents", "Arma 3 - Other Profiles", profile, "missions", mission, "mission.sqm")
-        path = os.path.expanduser("~/{}".format(sqm))
+        path = os.path.join("~", "Documents", "Arma 3 - Other Profiles", profile, "missions", mission, "mission.sqm")
+        path = os.path.expanduser(path)
 
     if not os.path.exists(path):
         return None
@@ -199,6 +199,8 @@ def main():
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
 
     args = parser.parse_args()
+
+    global VERBOSE
     VERBOSE = args.verbose
 
     # Arma path
