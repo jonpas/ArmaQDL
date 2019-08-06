@@ -21,8 +21,8 @@ It is advisable to add the program to `PATH` environmental variable to use it fr
 
 **Example:**
 
-Launches Arma with CBA from P-drive, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds mods from P-drive and local development folder and opens the latest log file. Loads Arma directly into editor using the specified mission from "Soldier" profile.
+Launches Arma with CBA from P-drive, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds ACRE2 mod and opens the latest log file. Loads Arma directly into editor using the specified mission from "Soldier" profile.
 
 ```
-$ armaqdl.py -m p:x\cba workshop:@ace dev:acre2 -b -m Soldier:test.vr
+$ armaqdl.py -m p:x\cba workshop:@ace dev:acre2:b -e Soldier:test.vr
 ```

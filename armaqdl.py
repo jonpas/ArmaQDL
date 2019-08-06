@@ -79,7 +79,7 @@ def build_mod(path):
     return False
 
 
-def process_mods(mods, build):
+def process_mods(mods, build_dev):
     if not mods:
         return ""
 
@@ -87,11 +87,15 @@ def process_mods(mods, build):
 
     for mod in mods:
         location = "p"  # Default if not specified
+        build = False
 
         # Path
         cli_mod = mod
-        if ":" in mod:
+        separators = mod.count(":")
+        if separators == 1:
             location, mod = mod.split(":")
+        elif separators == 2:
+            location, mod, build = mod.split(":")
 
         path = MOD_LOCATIONS.get(location)
         if not path or not os.path.exists(path):
@@ -107,7 +111,7 @@ def process_mods(mods, build):
         print("{}  [{}]".format(cli_mod, path))
 
         # Build
-        if build and location in BUILD_DEV_MODS:
+        if build or (build_dev and location in BUILD_DEV_MODS):
             build_mod(path)
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
