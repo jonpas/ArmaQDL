@@ -21,10 +21,10 @@ MOD_LOCATIONS = {
 BUILD_DEV_MODS = ["dev", "p"]
 
 BUILD_TOOLS = {
-    # Name: [file identifier, subprogram, command]
-    "HEMTT": ["hemtt.toml", "", "hemtt build"],
+    # Name: [file identifier, command, arguments]
+    "HEMTT": ["hemtt.toml", "hemtt", "build"],
     "Mikero": [r"tools\build.py", "python", r"tools\build.py"],
-    "Make": ["Makefile", "", "make -j4"]
+    "Make": ["Makefile", "make", "-j4"]
 }
 
 OPEN_LOG_DELAY = 3
@@ -66,12 +66,11 @@ def open_last_rpt():
 
 def build_mod(path):
     for build_tool, info in BUILD_TOOLS.items():
-        req_file, subprogram, cmd = info
+        req_file, cmd, args = info
 
         if os.path.exists(os.path.join(path, req_file)):
-            print("=> Building [{}]".format(build_tool))
-            cmd = os.path.join(path, cmd)
-            subprocess.run([subprogram, cmd])
+            print("=> Building [{}] ...".format(build_tool))
+            subprocess.run([cmd, args], cwd=path, shell=True)
             print()
             return True
 
