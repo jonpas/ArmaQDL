@@ -188,8 +188,8 @@ def main():
     # Parse arguments
     parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher")
 
-    parser.add_argument("-m", "--mod", nargs="*", type=str, help="path to mod folder")
-    parser.add_argument("-e", "--editor", default="", type=str, help="mission to load")
+    parser.add_argument("mods", metavar="loc:mod ...", type=str, nargs="*", help="paths to mods")
+    parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
@@ -214,13 +214,13 @@ def main():
         return 1
 
     # Mods
-    param_mods = process_mods(args.mod, args.build)
+    param_mods = process_mods(args.mods, args.build)
     if param_mods is None:
         print("Error! Invalid mod(s).")
         return 2
 
     # Mission path
-    param_mission = process_mission(args.editor, args.profile)
+    param_mission = process_mission(args.mission, args.profile)
     if param_mission is None:
         print("Error! Invalid mission.")
         return 3
