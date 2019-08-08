@@ -70,11 +70,17 @@ def build_mod(path):
 
         if os.path.exists(os.path.join(path, req_file)):
             print("=> Building [{}] ...".format(build_tool))
-            subprocess.run([cmd, args], cwd=path, shell=True)
+
+            try:
+                subprocess.run([cmd, args], cwd=path, shell=True, check=True)
+            except subprocess.CalledProcessError as e:
+                print("  -> Failed! Build error.\n")
+                return False
+
             print()
             return True
 
-    print("  -> Failed! No build tool found.")
+    print("  -> Failed! No build tool found.\n")
     return False
 
 
@@ -106,12 +112,14 @@ def process_mods(mods, build_dev):
                 print("Invalid mod path: {}".format(path))
                 continue
 
-        paths.append(path)
         print("{}  [{}]".format(cli_mod, path))
 
         # Build
         if build or (build_dev and location in BUILD_DEV_MODS):
-            build_mod(path)
+            if not build_mod(path):
+                continue
+
+        paths.append(path)  # Marks success
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
     if len(paths) != len(mods):
@@ -180,7 +188,8 @@ def run_arma(arma_path, params):
         print("Process command: {}".format(process_cmd))
 
     print("Running ...")
-    subprocess.run(process_cmd)
+    # Don't wait for process to finish (Popen() instead of run())
+    subprocess.Popen(process_cmd)
 
 
 def main():
