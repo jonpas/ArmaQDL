@@ -159,7 +159,7 @@ def process_mission(mission, profile):
 
 
 def process_flags(args):
-    flags = ["-nosplash", "-noPause", "-hugepages"]
+    flags = ["-nosplash", "-hugepages"]
 
     if args.profile:
         flags.append("-name={}".format(args.profile))
@@ -171,6 +171,9 @@ def process_flags(args):
 
     if not args.no_errors:
         flags.append("-showScriptErrors")
+
+    if args.no_pause:
+        flags.append("-noPause")
 
     if args.signatures:
         flags.append("-checkSignatures")
@@ -202,6 +205,7 @@ def main():
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
     parser.add_argument("-ne", "--no-errors", action="store_true", help="hide script errors")
+    parser.add_argument("-np", "--no-pause", action="store_true", help="don't pause on focus loss")
     parser.add_argument("-s", "--signatures", action="store_true", help="check signatures")
     parser.add_argument("-f", "--fullscreen", action="store_true")
 
