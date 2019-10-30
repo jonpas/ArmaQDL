@@ -73,7 +73,7 @@ def build_mod(path):
 
             try:
                 subprocess.run([cmd, args], cwd=path, shell=True, check=True)
-            except subprocess.CalledProcessError as e:
+            except subprocess.CalledProcessError:
                 print("  -> Failed! Build error.\n")
                 return False
 
@@ -89,6 +89,7 @@ def process_mods(mods, build_dev):
         return ""
 
     paths = []
+    wildcards = 0
 
     for mod in mods:
         location = "p"  # Default if not specified
@@ -102,12 +103,21 @@ def process_mods(mods, build_dev):
         elif separators == 2:
             location, mod, build = mod.split(":")
 
-        path = MOD_LOCATIONS.get(location)
-        if not path or not os.path.exists(path):
+        location_path = MOD_LOCATIONS.get(location)
+        if not location_path or not os.path.exists(location_path):
             print("Invalid location: {}".format(location))
             continue
         else:
-            path = os.path.join(path, mod)
+            path = os.path.join(location_path, mod)
+
+            # Split wildcard (add to the end)
+            if "*" in mod:
+                mods_wildcard = ["{}:{}".format(location, mod_wildcard[len(location_path) + 1:])
+                                 for mod_wildcard in glob.glob(path)]
+                mods.extend(mods_wildcard)
+                wildcards += 1
+                continue
+
             if not os.path.exists(path):
                 print("Invalid mod path: {}".format(path))
                 continue
@@ -122,7 +132,7 @@ def process_mods(mods, build_dev):
         paths.append(path)  # Marks success
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
-    if len(paths) != len(mods):
+    if len(paths) != len(mods) - wildcards:
         return None
 
     return "-mod={}".format(";".join(paths))

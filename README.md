@@ -12,6 +12,7 @@ Through easily-identifiable preset locations, program is able to provide a fast 
 - Open last log file
 - Select profile to start with
 - Toggle file patching, script errors, signature check and windowed mode
+- Wildcard support (`glob` pattern matching)
 
 ## Usage
 
