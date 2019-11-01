@@ -5,6 +5,7 @@ import os
 import argparse
 import subprocess
 import glob
+import re
 import threading
 import time
 
@@ -28,12 +29,15 @@ BUILD_TOOLS = {
 }
 
 OPEN_LOG_DELAY = 3
+
+SERVER_PROFILE = "Server"
+SERVER_JOIN = "localhost:2302:test"
 # CONFIGURATION END #
 
 VERBOSE = False
 
 
-def find_arma():
+def find_arma(executable=True):
     path = ""
 
     if os.name == "nt":
@@ -45,7 +49,8 @@ def find_arma():
             print("Error! Could not find Arma path in registry.")
             return None
 
-        path = os.path.join(path, "arma3_x64.exe")
+        if executable:
+            path = os.path.join(path, "arma3_x64.exe")
 
         if not path or not os.path.exists(path):
             return None
@@ -168,6 +173,44 @@ def process_mission(mission, profile):
     return path
 
 
+def process_mission_server(mission):
+    if not mission:
+        return ""
+
+    if ":" in mission:
+        print("Warning! Mission allowed only from root 'MPMissions' folder!")
+        _, mission = mission.split(":")
+
+    if "mission.sqm" in mission:
+        mission = mission[:-12]  # Remove "/mission.sqm"
+
+    if "/" in mission or "\\" in mission:
+        print("Warning! Mission allowed only from root 'MPMissions' folder!")
+        mission = mission.rsplit("/", 1)[-1]
+        mission = mission.rsplit("\\", 1)[-1]
+
+    # TODO Support special characters (. -> %20)
+
+    arma_path = find_arma(executable=False)
+    path = os.path.join(arma_path, "MPMissions", mission)
+    if not os.path.exists(path):
+        return None
+
+    # Replace server.cfg mission template
+    cfg_path = r"{}\server.cfg".format(arma_path)
+    if cfg_path and os.path.exists(cfg_path):
+        with open(cfg_path, "r+") as f:
+            cfg = f.read()
+            cfg_replaced = re.sub('(template = ").+(";)', r'\1{}\2'.format(mission), cfg)
+            f.seek(0)
+            f.write(cfg_replaced)
+            f.truncate()
+    else:
+        print("Error! server.cfg not found! [{}]".format(cfg_path))
+
+    return ""
+
+
 def process_flags(args):
     flags = ["-nosplash", "-hugepages"]
 
@@ -185,11 +228,33 @@ def process_flags(args):
     if args.no_pause:
         flags.append("-noPause")
 
-    if args.signatures:
+    if args.check_signatures:
         flags.append("-checkSignatures")
 
     if not args.fullscreen:
         flags.append("-window")
+
+    if args.join_server:
+        if args.join_server.count(":") == 2:
+            ip, port, password = args.join_server.split(":")
+            flags.append("-connect={}".format(ip))
+            flags.append("-port={}".format(port))
+            flags.append("-password={}".format(password))
+        else:
+            print("Error! Invalid server data! (expected 2 ':' seperators)")
+
+    return flags
+
+
+def process_flags_server(args):
+    flags = ["-server", "-hugepages", "-loadMissionToMemory", "-config=server.cfg",
+             "-name={}".format(SERVER_PROFILE)]
+
+    if not args.no_filepatching:
+        flags.append("-filePatching")
+
+    if args.check_signatures:
+        flags.append("-checkSignatures")
 
     return flags
 
@@ -212,11 +277,14 @@ def main():
     parser.add_argument("mods", metavar="loc:mod ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
+    parser.add_argument("-s", "--server", action="store_true", help="start server")
+    parser.add_argument("-j", "--join-server", nargs="?", const=SERVER_JOIN, type=str, help="join server")
+
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
     parser.add_argument("-ne", "--no-errors", action="store_true", help="hide script errors")
     parser.add_argument("-np", "--no-pause", action="store_true", help="don't pause on focus loss")
-    parser.add_argument("-s", "--signatures", action="store_true", help="check signatures")
+    parser.add_argument("-c", "--check-signatures", action="store_true", help="check signatures")
     parser.add_argument("-f", "--fullscreen", action="store_true")
 
     parser.add_argument("-b", "--build", action="store_true", help="build development mods")
@@ -230,7 +298,7 @@ def main():
     VERBOSE = args.verbose
 
     # Arma path
-    arma_path = find_arma()
+    arma_path = find_arma(executable=True)
     if not arma_path:
         print("Error! Invalid Arma path.")
         return 1
@@ -242,13 +310,18 @@ def main():
         return 2
 
     # Mission path
-    param_mission = process_mission(args.mission, args.profile)
+    param_mission = None
+    if args.server:
+        param_mission = process_mission_server(args.mission)
+    else:
+        param_mission = process_mission(args.mission, args.profile)
+
     if param_mission is None:
         print("Error! Invalid mission.")
         return 3
 
     # Flags
-    param_flags = process_flags(args)
+    param_flags = process_flags_server(args) if args.server else process_flags(args)
 
     print()
 
