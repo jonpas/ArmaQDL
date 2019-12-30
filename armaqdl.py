@@ -271,8 +271,13 @@ def run_arma(arma_path, params):
 
 
 def main():
+    epilog = "preset mod locations:\n"
+    for location in MOD_LOCATIONS:
+        epilog += "  {} => {}\n".format(location, MOD_LOCATIONS[location])
+
     # Parse arguments
-    parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher")
+    parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher", epilog=epilog,
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("mods", metavar="loc:mod ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
