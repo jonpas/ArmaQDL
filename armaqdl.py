@@ -64,7 +64,7 @@ def find_arma(executable=True):
 def open_last_rpt():
     time.sleep(OPEN_LOG_DELAY)
     rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
-    rpt_list = glob.glob("{}/*.rpt".format(rpt_path))
+    rpt_list = glob.glob(f"{rpt_path}/*.rpt")
     last_rpt = max(rpt_list, key=os.path.getctime)
     os.startfile(last_rpt)
 
@@ -74,7 +74,7 @@ def build_mod(path):
         req_file, cmd, args = info
 
         if os.path.exists(os.path.join(path, req_file)):
-            print("=> Building [{}] ...".format(build_tool))
+            print(f"=> Building [{build_tool}] ...")
 
             try:
                 subprocess.run([cmd, args], cwd=path, shell=True, check=True)
@@ -110,24 +110,24 @@ def process_mods(mods, build_dev):
 
         location_path = MOD_LOCATIONS.get(location)
         if not location_path or not os.path.exists(location_path):
-            print("Invalid location: {}".format(location))
+            print(f"Invalid location: {location}")
             continue
         else:
             path = os.path.join(location_path, mod)
 
             # Split wildcard (add to the end)
             if "*" in mod:
-                mods_wildcard = ["{}:{}".format(location, mod_wildcard[len(location_path) + 1:])
+                mods_wildcard = [f"{location}:{mod_wildcard[len(location_path) + 1:]}"
                                  for mod_wildcard in glob.glob(path)]
                 mods.extend(mods_wildcard)
                 wildcards += 1
                 continue
 
             if not os.path.exists(path):
-                print("Invalid mod path: {}".format(path))
+                print(f"Invalid mod path: {path}")
                 continue
 
-        print("{}  [{}]".format(cli_mod, path))
+        print(f"{cli_mod}  [{path}]")
 
         # Build
         if build or (build_dev and location in BUILD_DEV_MODS):
@@ -140,7 +140,7 @@ def process_mods(mods, build_dev):
     if len(paths) != len(mods) - wildcards:
         return None
 
-    return "-mod={}".format(";".join(paths))
+    return f"-mod={';'.join(paths)}"
 
 
 def process_mission(mission, profile):
@@ -197,16 +197,16 @@ def process_mission_server(mission):
         return None
 
     # Replace server.cfg mission template
-    cfg_path = r"{}\server.cfg".format(arma_path)
+    cfg_path = fr"{arma_path}\server.cfg"
     if cfg_path and os.path.exists(cfg_path):
         with open(cfg_path, "r+") as f:
             cfg = f.read()
-            cfg_replaced = re.sub('(template = ").+(";)', r'\1{}\2'.format(mission), cfg)
+            cfg_replaced = re.sub('(template = ").+(";)', fr'\1{mission}\2', cfg)
             f.seek(0)
             f.write(cfg_replaced)
             f.truncate()
     else:
-        print("Error! server.cfg not found! [{}]".format(cfg_path))
+        print(f"Error! server.cfg not found! [{cfg_path}]")
 
     return ""
 
@@ -215,7 +215,7 @@ def process_flags(args):
     flags = ["-nosplash", "-hugepages"]
 
     if args.profile:
-        flags.append("-name={}".format(args.profile))
+        flags.append(f"-name={args.profile}")
     else:
         print("Waning! No profile given!")
 
@@ -237,9 +237,9 @@ def process_flags(args):
     if args.join_server:
         if args.join_server.count(":") == 2:
             ip, port, password = args.join_server.split(":")
-            flags.append("-connect={}".format(ip))
-            flags.append("-port={}".format(port))
-            flags.append("-password={}".format(password))
+            flags.append(f"-connect={ip}")
+            flags.append(f"-port={port}")
+            flags.append(f"-password={password}")
         else:
             print("Error! Invalid server data! (expected 2 ':' seperators)")
 
@@ -248,7 +248,7 @@ def process_flags(args):
 
 def process_flags_server(args):
     flags = ["-server", "-hugepages", "-loadMissionToMemory", "-config=server.cfg",
-             "-name={}".format(SERVER_PROFILE)]
+             f"-name={SERVER_PROFILE}"]
 
     if not args.no_filepatching:
         flags.append("-filePatching")
@@ -263,7 +263,7 @@ def run_arma(arma_path, params):
     process_cmd = [arma_path] + params
 
     if VERBOSE:
-        print("Process command: {}".format(process_cmd))
+        print(f"Process command: {process_cmd}")
 
     print("Running ...")
     # Don't wait for process to finish (Popen() instead of run())
@@ -273,7 +273,7 @@ def run_arma(arma_path, params):
 def main():
     epilog = "preset mod locations:\n"
     for location in MOD_LOCATIONS:
-        epilog += "  {} => {}\n".format(location, MOD_LOCATIONS[location])
+        epilog += f"  {location} => {MOD_LOCATIONS[location]}\n"
 
     # Parse arguments
     parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher", epilog=epilog,
@@ -332,7 +332,7 @@ def main():
 
     # Open log file
     if not args.no_log:
-        print("Opening last log in {}s ...".format(OPEN_LOG_DELAY))
+        print(f"Opening last log in {OPEN_LOG_DELAY}s ...")
         t = threading.Thread(target=open_last_rpt)
         t.start()
 
