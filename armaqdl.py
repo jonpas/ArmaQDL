@@ -97,19 +97,27 @@ def process_mods(mods, build_dev):
     wildcards = 0
 
     for mod in mods:
-        location = "p"  # Default if not specified
+        location = "abs"  # Default if not specified
         build = False
 
         # Path
         cli_mod = mod
-        separators = mod.count(":")
+        separators = cli_mod.count(":")
         if separators == 1:
-            location, mod = mod.split(":")
+            if location == "abs":
+                mod1, mod2 = cli_mod.split(":")
+                mod = f"{mod1}:{mod2}"
+            else:
+                location, mod = cli_mod.split(":")
         elif separators == 2:
-            location, mod, build = mod.split(":")
+            if location == "abs":
+                mod1, mod2, build = cli_mod.split(":")
+                mod = f"{mod1}:{mod2}"
+            else:
+                location, mod, build = cli_mod.split(":")
 
-        location_path = MOD_LOCATIONS.get(location)
-        if not location_path or not os.path.exists(location_path):
+        location_path = MOD_LOCATIONS.get(location) if location != "abs" else ""
+        if location != "abs" and (location_path is None or not os.path.exists(location_path)):
             print(f"Invalid location: {location}")
             continue
         else:
