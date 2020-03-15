@@ -104,36 +104,36 @@ def process_mods(mods, build_dev):
         cli_mod = mod
         separators = cli_mod.count(":")
         if separators == 1:
-            if location == "abs":
-                mod1, mod2 = cli_mod.split(":")
-                mod = f"{mod1}:{mod2}"
-            else:
-                location, mod = cli_mod.split(":")
+            location, mod = cli_mod.split(":")
         elif separators == 2:
-            if location == "abs":
-                mod1, mod2, build = cli_mod.split(":")
-                mod = f"{mod1}:{mod2}"
-            else:
-                location, mod, build = cli_mod.split(":")
+            location, mod, build = cli_mod.split(":")
 
-        location_path = MOD_LOCATIONS.get(location) if location != "abs" else ""
-        if location != "abs" and (location_path is None or not os.path.exists(location_path)):
-            print(f"Invalid location: {location}")
-            continue
+        if location not in MOD_LOCATIONS.keys():
+            # Absolute path
+            mod = f"{location}:{mod}"
+            location = "abs"
+            location_path = ""
         else:
-            path = os.path.join(location_path, mod)
-
-            # Split wildcard (add to the end)
-            if "*" in mod:
-                mods_wildcard = [f"{location}:{mod_wildcard[len(location_path) + 1:]}"
-                                 for mod_wildcard in glob.glob(path)]
-                mods.extend(mods_wildcard)
-                wildcards += 1
+            # Predefined path
+            location_path = MOD_LOCATIONS.get(location)
+            if location_path is None:
+                print(f"Invalid lication: {location}")
                 continue
 
-            if not os.path.exists(path):
-                print(f"Invalid mod path: {path}")
-                continue
+        path = os.path.join(location_path, mod)
+        print(f"{path}\n{location_path}\n{mod}")
+
+        # Split wildcard (add to the end)
+        if "*" in mod:
+            mods_wildcard = [f"{location}:{mod_wildcard[len(location_path) + 1:]}"
+                             for mod_wildcard in glob.glob(path)]
+            mods.extend(mods_wildcard)
+            wildcards += 1
+            continue
+
+        if not os.path.exists(path):
+            print(f"Invalid mod path: {path}")
+            continue
 
         print(f"{cli_mod}  [{path}]")
 
