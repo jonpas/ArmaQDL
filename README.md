@@ -31,6 +31,11 @@ Launches Arma with CBA from P-drive, ACE3 from Workshop install and ACRE2 from l
 $ armaqdl.py p:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
 ```
 
+Specific build tool can also be specified, such as HEMTT:
+```
+$ armaqdl.py p:x\cba workshop:@ace dev:acre2:hemtt -m Soldier:test.vr
+```
+
 **Example 2:**
 
 Launches Arma Server with CBA from P-drive and loads specified mission from root `MPMissions` folder.

@@ -19,7 +19,7 @@ MOD_LOCATIONS = {
     "workshop": r"C:\Games\SteamLib\steamapps\common\Arma 3\!Workshop",
     "p": "P:\\"
 }
-BUILD_DEV_MODS = ["dev", "p"]
+BUILD_DEV_MODS = ["local", "dev", "p", "abs"]
 
 BUILD_TOOLS = {
     # Name: [file identifier, command, arguments]
@@ -69,11 +69,11 @@ def open_last_rpt():
     os.startfile(last_rpt)
 
 
-def build_mod(path):
+def build_mod(path, tool):
     for build_tool, info in BUILD_TOOLS.items():
         req_file, cmd, args = info
 
-        if os.path.exists(os.path.join(path, req_file)):
+        if (not tool or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
             print(f"=> Building [{build_tool}] ...")
 
             try:
@@ -85,11 +85,14 @@ def build_mod(path):
             print()
             return True
 
-    print("  -> Failed! No build tool found.\n")
+    if not tool:
+        print("=> Building failed! No build tool found.\n")
+    else:
+        print("=> Building failed! Specified build tool not found.\n")
     return False
 
 
-def process_mods(mods, build_dev):
+def process_mods(mods, build_dev_tool):
     if not mods:
         return ""
 
@@ -98,7 +101,7 @@ def process_mods(mods, build_dev):
 
     for mod in mods:
         location = "abs"  # Default if not specified
-        build = False
+        build_tool = None
 
         # Path
         cli_mod = mod
@@ -106,7 +109,7 @@ def process_mods(mods, build_dev):
         if separators == 1:
             location, mod = cli_mod.split(":")
         elif separators == 2:
-            location, mod, build = cli_mod.split(":")
+            location, mod, build_tool = cli_mod.split(":")
 
         if location not in MOD_LOCATIONS.keys():
             # Absolute path
@@ -138,8 +141,8 @@ def process_mods(mods, build_dev):
         print(f"{cli_mod}  [{path}]")
 
         # Build
-        if build or (build_dev and location in BUILD_DEV_MODS):
-            if not build_mod(path):
+        if build_tool is not None or (build_dev_tool is not None and location in BUILD_DEV_MODS):
+            if not build_mod(path, build_tool if build_tool is not None else build_dev_tool):
                 continue
 
         paths.append(path)  # Marks success
@@ -283,11 +286,15 @@ def main():
     for location in MOD_LOCATIONS:
         epilog += f"  {location} => {MOD_LOCATIONS[location]}\n"
 
+    epilog += "\npreset build tools:\n"
+    for tool in BUILD_TOOLS:
+        epilog += f"  {tool} ({BUILD_TOOLS[tool][0]}) => {BUILD_TOOLS[tool][1]} {BUILD_TOOLS[tool][2]}\n"
+
     # Parse arguments
     parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher", epilog=epilog,
                                      formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod ...", type=str, nargs="*", help="paths to mods")
+    parser.add_argument("mods", metavar="loc:mod[:b|:tool] ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
@@ -300,7 +307,8 @@ def main():
     parser.add_argument("-c", "--check-signatures", action="store_true", help="check signatures")
     parser.add_argument("-f", "--fullscreen", action="store_true")
 
-    parser.add_argument("-b", "--build", action="store_true", help="build development mods")
+    parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="", type=str,
+                        help="build mods (auto-determine tool if unspecified)")
     parser.add_argument("-nl", "--no-log", action="store_true", help="don't open last log")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
