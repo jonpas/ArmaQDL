@@ -124,7 +124,6 @@ def process_mods(mods, build_dev_tool):
                 continue
 
         path = os.path.join(location_path, mod)
-        print(f"{path}\n{location_path}\n{mod}")
 
         # Split wildcard (add to the end)
         if "*" in mod:
