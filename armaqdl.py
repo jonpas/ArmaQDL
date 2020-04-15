@@ -73,7 +73,7 @@ def build_mod(path, tool):
     for build_tool, info in BUILD_TOOLS.items():
         req_file, cmd, args = info
 
-        if (not tool or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
+        if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
             print(f"=> Building [{build_tool}] ...")
 
             try:
@@ -85,10 +85,10 @@ def build_mod(path, tool):
             print()
             return True
 
-    if not tool:
+    if tool == "b":
         print("=> Building failed! No build tool found.\n")
     else:
-        print("=> Building failed! Specified build tool not found.\n")
+        print(f"=> Building failed! Specified build tool not found: {tool}\n")
     return False
 
 
@@ -120,7 +120,7 @@ def process_mods(mods, build_dev_tool):
             # Predefined path
             location_path = MOD_LOCATIONS.get(location)
             if location_path is None:
-                print(f"Invalid lication: {location}")
+                print(f"Invalid location: {location}")
                 continue
 
         path = os.path.join(location_path, mod)
