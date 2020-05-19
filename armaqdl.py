@@ -305,6 +305,8 @@ def main():
     parser.add_argument("-np", "--no-pause", action="store_true", help="don't pause on focus loss")
     parser.add_argument("-c", "--check-signatures", action="store_true", help="check signatures")
     parser.add_argument("-f", "--fullscreen", action="store_true")
+    parser.add_argument("-par", "--parameters", nargs="+", type=str,
+                        help="other parameters to pass directly (use with '=' to pass '-<arg>')")
 
     parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="", type=str,
                         help="build mods (auto-determine tool if unspecified)")
@@ -342,8 +344,8 @@ def main():
 
     # Flags
     param_flags = process_flags_server(args) if args.server else process_flags(args)
-
-    print()
+    param_flags.extend(args.parameters)
+    print(f"Flags: {param_flags}\n")
 
     # Open log file
     if not args.no_log:
