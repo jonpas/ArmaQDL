@@ -344,7 +344,8 @@ def main():
 
     # Flags
     param_flags = process_flags_server(args) if args.server else process_flags(args)
-    param_flags.extend(args.parameters)
+    if args.parameters is not None:
+        param_flags.extend(args.parameters)
     print(f"Flags: {param_flags}\n")
 
     # Open log file
