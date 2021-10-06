@@ -14,10 +14,10 @@ if os.name == "nt":
 
 # CONFIGURATION START #
 MOD_LOCATIONS = {
-    "main": r"G:\SteamLib\steamapps\common\Arma 3",
+    "main": r"D:\Steam\steamapps\common\Arma 3",
     "local": r"D:\Arma 3" if os.name == "nt" else os.path.expanduser("~/Downloads"),
     "dev": r"E:\Arma 3\Mods",
-    "workshop": r"G:\SteamLib\steamapps\common\Arma 3\!Workshop",
+    "workshop": r"D:\Steam\steamapps\common\Arma 3\!Workshop",
     "p": "P:\\"
 }
 BUILD_DEV_MODS = ["local", "dev", "p", "abs"]
