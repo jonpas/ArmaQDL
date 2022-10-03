@@ -12,28 +12,8 @@ import time
 if os.name == "nt":
     import winreg
 
-# CONFIGURATION START #
-MOD_LOCATIONS = {
-    "main": r"D:\Steam\steamapps\common\Arma 3",
-    "local": r"D:\Arma 3" if os.name == "nt" else os.path.expanduser("~/Downloads"),
-    "dev": r"E:\Arma 3\Mods",
-    "workshop": r"D:\Steam\steamapps\common\Arma 3\!Workshop",
-    "p": "P:\\"
-}
-BUILD_DEV_MODS = ["local", "dev", "p", "abs"]
+import settings
 
-BUILD_TOOLS = {
-    # Name: [file identifier, command, arguments]
-    "HEMTT": ["hemtt.toml", "hemtt", "build"],
-    "Mikero": [r"tools\build.py", "python", r"tools\build.py"],
-    "Make": ["Makefile", "make", "-j4"]
-}
-
-OPEN_LOG_DELAY = 3
-
-SERVER_PROFILE = "Server"
-SERVER_JOIN = "localhost:2302:test"
-# CONFIGURATION END #
 
 VERBOSE = False
 
@@ -46,8 +26,8 @@ def find_arma(executable=True):
             k = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\WOW6432Node\Bohemia Interactive\Arma 3")
             path = winreg.EnumValue(k, 1)[1]
             winreg.CloseKey(k)
-        except:
-            print("Error! Could not find Arma path in registry.")
+        except OSError as e:
+            print(f"Error! Could not find Arma path in registry.\n{e}")
             return None
 
         if executable:
@@ -63,7 +43,7 @@ def find_arma(executable=True):
 
 
 def open_last_rpt():
-    time.sleep(OPEN_LOG_DELAY)
+    time.sleep(settings.OPEN_LOG_DELAY)
     rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
     rpt_list = glob.glob(f"{rpt_path}/*.rpt")
     last_rpt = max(rpt_list, key=os.path.getctime)
@@ -71,7 +51,7 @@ def open_last_rpt():
 
 
 def build_mod(path, tool):
-    for build_tool, info in BUILD_TOOLS.items():
+    for build_tool, info in settings.BUILD_TOOLS.items():
         req_file, cmd, args = info
 
         if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
@@ -112,14 +92,14 @@ def process_mods(mods, build_dev_tool):
         elif separators == 2:
             location, mod, build_tool = cli_mod.split(":")
 
-        if location not in MOD_LOCATIONS.keys():
+        if location not in settings.MOD_LOCATIONS.keys():
             # Absolute path
             mod = f"{location}:{mod}"
             location = "abs"
             location_path = ""
         else:
             # Predefined path
-            location_path = MOD_LOCATIONS.get(location)
+            location_path = settings.MOD_LOCATIONS.get(location)
             if location_path is None:
                 print(f"Invalid location: {location}")
                 continue
@@ -141,7 +121,7 @@ def process_mods(mods, build_dev_tool):
         print(f"{cli_mod}  [{path}]")
 
         # Build
-        if build_tool is not None or (build_dev_tool is not None and location in BUILD_DEV_MODS):
+        if build_tool is not None or (build_dev_tool is not None and location in settings.BUILD_DEV_MODS + ["abs"]):
             if not build_mod(path, build_tool if build_tool is not None else build_dev_tool):
                 continue
 
@@ -258,8 +238,8 @@ def process_flags(args):
 
 
 def process_flags_server(args):
-    flags = ["-server", "-hugepages", "-loadMissionToMemory", "-config=server.cfg",
-             f"-name={SERVER_PROFILE}"]
+    flags = ["-server", "-hugepages", "-loadMissionToMemory", "-settings.server.cfg",
+             f"-name={settings.SERVER_PROFILE}"]
 
     if not args.no_filepatching:
         flags.append("-filePatching")
@@ -283,12 +263,12 @@ def run_arma(arma_path, params):
 
 def main():
     epilog = "preset mod locations:\n"
-    for location in MOD_LOCATIONS:
-        epilog += f"  {location} => {MOD_LOCATIONS[location]}\n"
+    for location in settings.MOD_LOCATIONS:
+        epilog += f"  {location} => {settings.MOD_LOCATIONS[location]}\n"
 
     epilog += "\npreset build tools:\n"
-    for tool in BUILD_TOOLS:
-        epilog += f"  {tool} ({BUILD_TOOLS[tool][0]}) => {BUILD_TOOLS[tool][1]} {BUILD_TOOLS[tool][2]}\n"
+    for tool in settings.BUILD_TOOLS:
+        epilog += f"  {tool} ({settings.BUILD_TOOLS[tool][0]}) => {settings.BUILD_TOOLS[tool][1]} {settings.BUILD_TOOLS[tool][2]}\n"
 
     # Parse arguments
     parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher", epilog=epilog,
@@ -298,7 +278,7 @@ def main():
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
-    parser.add_argument("-j", "--join-server", nargs="?", const=SERVER_JOIN, type=str, help="join server")
+    parser.add_argument("-j", "--join-server", nargs="?", const=settings.SERVER_JOIN, type=str, help="join server")
 
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
@@ -351,7 +331,7 @@ def main():
 
     # Open log file
     if not args.no_log:
-        print(f"Opening last log in {OPEN_LOG_DELAY}s ...")
+        print(f"Opening last log in {settings.OPEN_LOG_DELAY}s ...")
         t = threading.Thread(target=open_last_rpt)
         t.start()
 
