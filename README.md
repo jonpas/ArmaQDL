@@ -19,7 +19,7 @@ Through easily-identifiable preset locations, program is able to provide a fast 
 
 ## Usage
 
-Download `armaqdl.py` and modify `CONFIGURATION` section on top of the file to your needs.
+Download `armaqdl.py` and modify `settings.py` file to your needs.
 
 It is advisable to add the program to `PATH` environmental variable to use it from anywhere.
 
