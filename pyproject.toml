@@ -4,7 +4,6 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ArmaQDL"
-version = "0.0.1"
 authors = [
     { name="Jonpas", email="jonpas33@gmail.com" },
 ]
@@ -23,6 +22,9 @@ classifiers = [
 dependencies = [
     "platformdirs",
     "toml",
+]
+dynamic = [
+    "version",
 ]
 
 [project.urls]
