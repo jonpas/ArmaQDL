@@ -47,8 +47,9 @@ def find_arma(executable=True):
 
 def open_last_rpt():
     if os.name == "nt":
-        print(f"Opening last log in {SETTINGS['log']['open_delay']}s ...")
-        time.sleep(SETTINGS['log']['open_delay'])
+        log_open_delay = SETTINGS.get('log', {}).get('open_delay', 3)
+        print(f"Opening last log in {log_open_delay}s ...")
+        time.sleep(log_open_delay)
 
         rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
         rpt_list = glob.glob(f"{rpt_path}/*.rpt")
@@ -59,7 +60,7 @@ def open_last_rpt():
 
 
 def build_mod(path, tool):
-    for build_tool in SETTINGS['build']:
+    for build_tool in SETTINGS.get('build', {}):
         req_file = SETTINGS['build'][build_tool]['presence']
         cmd = SETTINGS['build'][build_tool]['command']
 
@@ -101,14 +102,14 @@ def process_mods(mods, build_dev_tool):
         elif separators == 2:
             location, mod, build_tool = cli_mod.split(":")
 
-        if location not in SETTINGS['locations'].keys():
+        if location not in SETTINGS.get("locations", {}).keys():
             # Absolute path
             mod = f"{location}:{mod}"
             location = "abs"
             location_path = ""
         else:
             # Predefined path
-            location_path = SETTINGS['locations'].get(location)
+            location_path = SETTINGS.get("locations", {}).get(location)
             if location_path is None:
                 print(f"Invalid location: {location}")
                 continue
@@ -130,7 +131,7 @@ def process_mods(mods, build_dev_tool):
         print(f"{cli_mod}  [{path}]")
 
         # Build
-        if build_tool is not None or (build_dev_tool is not None and (SETTINGS['locations'][location]['build'] or location == "abs")):
+        if build_tool is not None or (build_dev_tool is not None and (location == "abs" or SETTINGS["locations"][location].get("build", False))):
             if not build_mod(path, build_tool if build_tool is not None else build_dev_tool):
                 continue
 
@@ -236,9 +237,9 @@ def process_flags(args):
 
     if args.join_server:
         if args.join_server is None:
-            ip = SETTINGS['server']['ip']
-            port = SETTINGS['server']['port']
-            password = SETTINGS['server']['password']
+            ip = SETTINGS.get("server", {}).get("ip", "localhost")
+            port = SETTINGS.get("server", {}).get("port", 2302)
+            password = SETTINGS.get("server", {}).get("password", "test")
             flags.append(f"-connect={ip}")
             flags.append(f"-port={port}")
             flags.append(f"-password={password}")
@@ -254,8 +255,10 @@ def process_flags(args):
 
 
 def process_flags_server(args):
+    server_profile = SETTINGS.get("server", {}).get("profile", "Server")
+
     flags = ["-server", "-hugepages", "-loadMissionToMemory", "-settings.server.cfg",
-             f"-name={SETTINGS['server']['profile']}"]
+             f"-name={server_profile}"]
 
     if not args.no_filepatching:
         flags.append("-filePatching")
@@ -319,21 +322,25 @@ def main():
 
     # Config
     if args.config == config.CONFIG_DIR:
+        # Generate new config if default config dir specified
+        # Alternative config dir is expected to already have everything necessary
         config.generate()
 
     global SETTINGS
     SETTINGS = config.load(args.config)
+    if not config.validate(SETTINGS):
+        return 1
 
     if args.list:
         epilog = f"ArmaQDL config location: {args.config}\n\n"
         epilog += "Mod Locations:"
-        for location in SETTINGS["locations"]:
+        for location in SETTINGS.get("locations", {}):
             epilog += f"\n  {location} => {SETTINGS['locations'][location]['path']}"
-            if SETTINGS['locations'][location]['build']:
+            if SETTINGS['locations'][location].get('build', False):
                 epilog += " (build)"
 
         epilog += "\n\nBuild Tools:"
-        for tool in SETTINGS["build"]:
+        for tool in SETTINGS.get("build", {}):
             epilog += f"\n  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}"
 
         print(epilog)
@@ -343,13 +350,13 @@ def main():
     arma_path = find_arma(executable=True)
     if not arma_path:
         print("Error! Invalid Arma path.")
-        return 1
+        return 2
 
     # Mods
     param_mods = process_mods(args.mods, args.build)
     if param_mods is None:
         print("Error! Invalid mod(s).")
-        return 2
+        return 3
 
     # Mission path
     param_mission = None
@@ -360,7 +367,7 @@ def main():
 
     if param_mission is None:
         print("Error! Invalid mission.")
-        return 3
+        return 4
 
     # Flags
     param_flags = process_flags_server(args) if args.server else process_flags(args)
