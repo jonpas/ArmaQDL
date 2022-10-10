@@ -18,7 +18,11 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Build Tools",
 ]
+dynamic = ["dependencies"]
 
 [project.urls]
 "Homepage" = "https://github.com/jonpas/Arma-QDL"
 "Bug Tracker" = "https://github.com/jonpas/Arma-QDL/issues"
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
