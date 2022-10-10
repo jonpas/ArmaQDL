@@ -78,5 +78,6 @@ ArmaQDL uses [Hatch](https://hatch.pypa.io/latest/) as the project manager and [
 
 ```
 $ hatch shell
-$ pip install .
 ```
+
+Limited Linux support exists for testing purposes, but launching Arma or opening last log file are not supported. Contributions are welcome!

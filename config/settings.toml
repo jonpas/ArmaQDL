@@ -1,0 +1,46 @@
+profile = "Dev"
+
+[locations]
+  [locations.main]
+    path = "D:/Steam/steamapps/common/Arma 3"
+    build = false
+
+  [locations.local]
+    path = "D:/Arma 3"
+    build = true
+
+  [locations.dev]
+    path = "E:/Arma 3/Mods"
+    build = true
+
+  [locations.workshop]
+    path = "D:/Steam/steamapps/common/Arma 3/!Workshop"
+    build = false
+
+  [locations.p]
+    path = "P:/"
+    build = true
+
+[build]
+  # Order defines priority if project supports multiple build tools
+  [build.hemtt]
+    presence = "hemtt.toml"
+    command = ["hemtt", "build"]
+
+  [build.mikero]
+    presence = "tools/build.py"
+    command = ["python", "tools/build.py"]
+
+  [build.make]
+    presence = "Makefile"
+    command = ["make", "-j4"]
+
+[log]
+  open_delay = 3
+
+[server]
+  profile = "Server"
+  ip = "localhost"
+  port = 2302
+  password = "test"
+  #join = "localhost:2302:test"

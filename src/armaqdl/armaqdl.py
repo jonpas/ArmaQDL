@@ -1,31 +1,24 @@
 #!/usr/bin/env python3
 
-import sys
-import os
 import argparse
-import subprocess
 import glob
+import os
 import re
+import subprocess
+import sys
 import threading
 import time
+from pathlib import Path
 
 if os.name == "nt":
     import winreg
 
-from . import settings
 from ._version import version as __version__
-
-from platformdirs import PlatformDirs
+from . import config
 
 
 VERBOSE = False
-CONFIG = PlatformDirs("Arma-QDL").user_config_dir
-
-import yaml
-cfg = yaml.safe_load(open("./src/armaqdl/settings.yml"))
-print(cfg)
-
-exit()
+SETTINGS = None
 
 
 def find_arma(executable=True):
@@ -54,26 +47,27 @@ def find_arma(executable=True):
 
 def open_last_rpt():
     if os.name == "nt":
-        print(f"Opening last log in {settings.OPEN_LOG_DELAY}s ...")
-        time.sleep(settings.OPEN_LOG_DELAY)
+        print(f"Opening last log in {SETTINGS['log']['open_delay']}s ...")
+        time.sleep(SETTINGS['log']['open_delay'])
 
         rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
         rpt_list = glob.glob(f"{rpt_path}/*.rpt")
         last_rpt = max(rpt_list, key=os.path.getctime)
         os.startfile(last_rpt)
     else:
-        print("Warning: Opening last log only implemented for Windows")
+        print("Warning: Opening last log only implemented for Windows.")
 
 
 def build_mod(path, tool):
-    for build_tool, info in settings.BUILD_TOOLS.items():
-        req_file, cmd, args = info
+    for build_tool in SETTINGS['build']:
+        req_file = SETTINGS['build'][build_tool]['presence']
+        cmd = SETTINGS['build'][build_tool]['command']
 
         if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
             print(f"=> Building [{build_tool}] ...")
 
             try:
-                subprocess.run([cmd, args], cwd=path, shell=True, check=True)
+                subprocess.run(cmd, cwd=path, shell=True, check=True)
             except subprocess.CalledProcessError:
                 print("  -> Failed! Build error.\n")
                 return False
@@ -107,14 +101,14 @@ def process_mods(mods, build_dev_tool):
         elif separators == 2:
             location, mod, build_tool = cli_mod.split(":")
 
-        if location not in settings.MOD_LOCATIONS.keys():
+        if location not in SETTINGS['locations'].keys():
             # Absolute path
             mod = f"{location}:{mod}"
             location = "abs"
             location_path = ""
         else:
             # Predefined path
-            location_path = settings.MOD_LOCATIONS.get(location)
+            location_path = SETTINGS['locations'].get(location)
             if location_path is None:
                 print(f"Invalid location: {location}")
                 continue
@@ -136,7 +130,7 @@ def process_mods(mods, build_dev_tool):
         print(f"{cli_mod}  [{path}]")
 
         # Build
-        if build_tool is not None or (build_dev_tool is not None and location in settings.BUILD_DEV_MODS + ["abs"]):
+        if build_tool is not None or (build_dev_tool is not None and (SETTINGS['locations'][location]['build'] or location == "abs")):
             if not build_mod(path, build_tool if build_tool is not None else build_dev_tool):
                 continue
 
@@ -241,7 +235,14 @@ def process_flags(args):
         flags.append("-window")
 
     if args.join_server:
-        if args.join_server.count(":") == 2:
+        if args.join_server is None:
+            ip = SETTINGS['server']['ip']
+            port = SETTINGS['server']['port']
+            password = SETTINGS['server']['password']
+            flags.append(f"-connect={ip}")
+            flags.append(f"-port={port}")
+            flags.append(f"-password={password}")
+        elif args.join_server.count(":") == 2:
             ip, port, password = args.join_server.split(":")
             flags.append(f"-connect={ip}")
             flags.append(f"-port={port}")
@@ -254,7 +255,7 @@ def process_flags(args):
 
 def process_flags_server(args):
     flags = ["-server", "-hugepages", "-loadMissionToMemory", "-settings.server.cfg",
-             f"-name={settings.SERVER_PROFILE}"]
+             f"-name={SETTINGS['server']['profile']}"]
 
     if not args.no_filepatching:
         flags.append("-filePatching")
@@ -277,25 +278,17 @@ def run_arma(arma_path, params):
 
 
 def main():
-    epilog = "preset mod locations:\n"
-    for location in settings.MOD_LOCATIONS:
-        epilog += f"  {location} => {settings.MOD_LOCATIONS[location]}\n"
-
-    epilog += "\npreset build tools:\n"
-    for tool in settings.BUILD_TOOLS:
-        epilog += f"  {tool} ({settings.BUILD_TOOLS[tool][0]}) => {settings.BUILD_TOOLS[tool][1]} {settings.BUILD_TOOLS[tool][2]}\n"
-
     # Parse arguments
     parser = argparse.ArgumentParser(
         prog="armaqdl",
-        description=f"Quick development Arma 3 launcher v{__version__}", epilog=epilog,
+        description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("mods", metavar="loc:mod[:b|:tool] ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
-    parser.add_argument("-j", "--join-server", nargs="?", const=settings.SERVER_JOIN, type=str, help="join server")
+    parser.add_argument("-j", "--join-server", nargs="?", type=str, help="join server")
 
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
@@ -310,6 +303,8 @@ def main():
                         help="build mods (auto-determine tool if unspecified)")
     parser.add_argument("-nl", "--no-log", action="store_true", help="don't open last log")
 
+    parser.add_argument("--config", default=config.CONFIG_DIR, type=Path, help="load config from specified folder")
+    parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
     parser.add_argument("--version", action="store_true", help="show version")
 
@@ -321,6 +316,28 @@ def main():
 
     global VERBOSE
     VERBOSE = args.verbose
+
+    # Config
+    if not args.config:
+        config.generate()
+
+    global SETTINGS
+    SETTINGS = config.load(args.config)
+
+    if args.list:
+        epilog = "ArmaQDL config mod locations:\n"
+        for location in SETTINGS["locations"]:
+            epilog += f"  {location} => {SETTINGS['locations'][location]['path']}"
+            if SETTINGS['locations'][location]['build']:
+                epilog += " (build)"
+            epilog += "\n"
+
+        epilog += "\nArmaQDL config build tools:\n"
+        for tool in SETTINGS["build"]:
+            epilog += f"  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}\n"
+
+        print(epilog)
+        return 0
 
     # Arma path
     arma_path = find_arma(executable=True)
@@ -363,7 +380,10 @@ def main():
     if param_mods:
         params.append(param_mods)
 
-    run_arma(arma_path, params)
+    if os.name == "nt":
+        run_arma(arma_path, params)
+    else:
+        print("Warning: Launching Arma only implemented for Windows.")
 
     return 0
 
