@@ -40,7 +40,10 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/armaqdl"]
+packages = ["src/armaqdl", "config"]
+
+[tool.hatch.build.targets.wheel.sources]
+"config" = "armaqdl/config"
 
 [tool.hatch.version]
 source = "vcs"

@@ -10,13 +10,17 @@ from platformdirs import PlatformDirs
 CONFIG_DIR = Path(PlatformDirs("ArmaQDL", False, roaming=True).user_config_dir)
 SETTINGS_FILE = "settings.toml"
 
+DIST_CONFIG_DIR = Path(__file__).parent / "config"
+if not DIST_CONFIG_DIR.exists():  # editable install fall-back location
+    DIST_CONFIG_DIR = Path(__file__).parent.parent.parent / "config"
+
 
 def generate():
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
     settings_path = CONFIG_DIR / SETTINGS_FILE
     if not settings_path.exists() or os.stat(settings_path).st_size == 0:
-        shutil.copy2(Path("config") / SETTINGS_FILE, settings_path)
+        shutil.copy2(DIST_CONFIG_DIR / SETTINGS_FILE, settings_path)
         print("Generated new settings file.")
 
 
