@@ -15,6 +15,7 @@ def generate():
 
     if not (CONFIG_DIR / SETTINGS_FILE).exists():
         shutil.copy2(Path("config") / SETTINGS_FILE, CONFIG_DIR / SETTINGS_FILE)
+        print("Generated new settings file.")
 
 
 def load(folder):
