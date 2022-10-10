@@ -20,6 +20,7 @@ Through easily-identifiable preset locations, program is able to provide a fast 
 - Load mission on dedicated server (by manipulating `server.cfg`)
 - Join server
 
+
 ## Installation
 
 ArmaQDL is distributed on [PyPI](https://pypi.org/). Installation as a user is recommended to avoid permission issues with CLI script installation.
@@ -27,18 +28,19 @@ ArmaQDL is distributed on [PyPI](https://pypi.org/). Installation as a user is r
 ```
 $ pip install --user ArmaQDL
 ```
+_Note: Add pip installation directory to `PATH` environmental variable to use it directly._
 
-Modify settings to your needs:
 
-```
-TODO
-```
+Modify settings to your needs. Settings file can be found in your operating system's standard configuration directory, usually:
+- Windows: `%AppData%\ArmaQDL\settings.toml`
+- Linux: `~/.config/ArmaQDL/settings.toml`
 
-It is advisable to add the program to `PATH` environmental variable to use it from anywhere.
+Settings are in [TOML](https://toml.io/en/) format.
+
 
 ## Usage
 
-ArmaQDL will install a CLI script, but it can also be used as a Python module.
+ArmaQDL will install a CLI script _(requires it to be in `PATH`)_, but it can also be used as a Python module.
 
 ```
 $ armaqdl -h
@@ -71,6 +73,7 @@ Launches Arma with CBA from P-drive and connects to the given server with given 
 ```
 $ armaqdl p:x\cba -j 192.168.1.1:2302:test
 ```
+
 
 ## Development
 

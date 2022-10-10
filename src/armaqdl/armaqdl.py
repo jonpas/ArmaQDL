@@ -318,23 +318,23 @@ def main():
     VERBOSE = args.verbose
 
     # Config
-    if not args.config:
+    if args.config == config.CONFIG_DIR:
         config.generate()
 
     global SETTINGS
     SETTINGS = config.load(args.config)
 
     if args.list:
-        epilog = "ArmaQDL config mod locations:\n"
+        epilog = f"ArmaQDL config location: {args.config}\n\n"
+        epilog += "mod locations:"
         for location in SETTINGS["locations"]:
-            epilog += f"  {location} => {SETTINGS['locations'][location]['path']}"
+            epilog += f"\n  {location} => {SETTINGS['locations'][location]['path']}"
             if SETTINGS['locations'][location]['build']:
                 epilog += " (build)"
-            epilog += "\n"
 
-        epilog += "\nArmaQDL config build tools:\n"
+        epilog += "\n\nbuild tools:"
         for tool in SETTINGS["build"]:
-            epilog += f"  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}\n"
+            epilog += f"\n  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}"
 
         print(epilog)
         return 0

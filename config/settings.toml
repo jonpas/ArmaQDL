@@ -43,4 +43,3 @@ profile = "Dev"
   ip = "localhost"
   port = 2302
   password = "test"
-  #join = "localhost:2302:test"

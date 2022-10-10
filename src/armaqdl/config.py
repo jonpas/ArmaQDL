@@ -6,17 +6,15 @@ from pathlib import Path
 import toml
 from platformdirs import PlatformDirs
 
-CONFIG_DIR = Path(PlatformDirs("ArmaQDL").user_config_dir)
+CONFIG_DIR = Path(PlatformDirs("ArmaQDL", False, roaming=True).user_config_dir)
 SETTINGS_FILE = "settings.toml"
-
-SETTINGS_PATH = CONFIG_DIR / SETTINGS_FILE
 
 
 def generate():
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    if not SETTINGS_PATH.exists():
-        shutil.copy2("config" / SETTINGS_FILE, SETTINGS_PATH)
+    if not (CONFIG_DIR / SETTINGS_FILE).exists():
+        shutil.copy2(Path("config") / SETTINGS_FILE, CONFIG_DIR / SETTINGS_FILE)
 
 
 def load(folder):

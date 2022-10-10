@@ -24,7 +24,6 @@ dependencies = [
     "platformdirs",
     "toml",
 ]
-dynamic = ["version"]
 
 [project.urls]
 "Homepage" = "https://github.com/jonpas/Arma-QDL"
