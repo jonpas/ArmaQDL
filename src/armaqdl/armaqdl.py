@@ -320,6 +320,7 @@ def main():
     # Config
     if args.config == config.CONFIG_DIR:
         config.generate()
+        print("Generated new config files.")
 
     global SETTINGS
     SETTINGS = config.load(args.config)

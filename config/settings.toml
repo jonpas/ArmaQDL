@@ -1,28 +1,32 @@
+# Default profile to use with ArmaQDL
 profile = "Dev"
 
+# Predefined locations of mods to be used with CLI as `location:@mod`
+# Alternatively use full absolute paths to `@mod` folders with the CLI
 [locations]
+  # Every location contains a path and a build flag determining if mods from that folder should be rebuild with the `-b` CLI flag
+
   [locations.main]
-    path = "D:/Steam/steamapps/common/Arma 3"
+    path = "C:/Program Files (x86)/Steam/steamapps/common/Arma 3"
     build = false
-
-  [locations.local]
-    path = "D:/Arma 3"
-    build = true
-
-  [locations.dev]
-    path = "E:/Arma 3/Mods"
-    build = true
 
   [locations.workshop]
-    path = "D:/Steam/steamapps/common/Arma 3/!Workshop"
+    path = "C:/Program Files (x86)/Steam/steamapps/common/Arma 3/!Workshop"
     build = false
+
+  [locations.dev]
+    path = "C:/Arma 3/Mods"
+    build = true
 
   [locations.p]
     path = "P:/"
     build = true
 
+# Build tools and their instructions
 [build]
+  # Every build tool contains presence marker (a file) determining if a tool can be used and the invocation command
   # Order defines priority if project supports multiple build tools
+
   [build.hemtt]
     presence = "hemtt.toml"
     command = ["hemtt", "build"]
@@ -38,6 +42,7 @@ profile = "Dev"
 [log]
   open_delay = 3
 
+# Default server information to use with ArmaQDL
 [server]
   profile = "Server"
   ip = "localhost"
