@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import shutil
 from pathlib import Path
 
@@ -13,8 +14,9 @@ SETTINGS_FILE = "settings.toml"
 def generate():
     CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-    if not (CONFIG_DIR / SETTINGS_FILE).exists():
-        shutil.copy2(Path("config") / SETTINGS_FILE, CONFIG_DIR / SETTINGS_FILE)
+    settings_path = CONFIG_DIR / SETTINGS_FILE
+    if not settings_path.exists() or os.stat(settings_path).st_size == 0:
+        shutil.copy2(Path("config") / SETTINGS_FILE, settings_path)
         print("Generated new settings file.")
 
 
