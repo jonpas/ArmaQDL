@@ -235,8 +235,8 @@ def process_flags(args):
     if not args.fullscreen:
         flags.append("-window")
 
-    if args.join_server:
-        if args.join_server is None:
+    if args.join_server is not None:
+        if args.join_server == "":
             ip = SETTINGS.get("server", {}).get("ip", "localhost")
             port = SETTINGS.get("server", {}).get("port", 2302)
             password = SETTINGS.get("server", {}).get("password", "test")
@@ -257,7 +257,7 @@ def process_flags(args):
 def process_flags_server(args):
     server_profile = SETTINGS.get("server", {}).get("profile", "Server")
 
-    flags = ["-server", "-hugepages", "-loadMissionToMemory", "-settings.server.cfg",
+    flags = ["-server", "-hugepages", "-loadMissionToMemory", "-config=server.cfg",
              f"-name={server_profile}"]
 
     if not args.no_filepatching:
@@ -291,7 +291,7 @@ def main():
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
-    parser.add_argument("-j", "--join-server", nargs="?", type=str, help="join server")
+    parser.add_argument("-j", "--join-server", nargs="?", const="", type=str, help="join server")
 
     parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
