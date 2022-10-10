@@ -30,12 +30,18 @@ $ pip install --user ArmaQDL
 ```
 _Note: Add pip installation directory to `PATH` environmental variable to use it directly._
 
+Run it once to generate configuration files.
+
+```
+$ armaqdl --version
+$ python -m armaqdl --version
+```
 
 Modify settings to your needs. Settings file can be found in your operating system's standard configuration directory, usually:
 - Windows: `%AppData%\ArmaQDL\settings.toml`
 - Linux: `~/.config/ArmaQDL/settings.toml`
 
-Settings are in [TOML](https://toml.io/en/) format.
+Settings are in [TOML](https://toml.io/en/) format and can be edited with any text editor.
 
 
 ## Usage
