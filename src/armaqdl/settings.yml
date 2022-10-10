@@ -1,0 +1,33 @@
+mod_locations:
+  main:
+    path: "D:/Steam/steamapps/common/Arma 3"
+    build: false
+  local:
+    path: "D:/Arma 3"
+    build: true
+  dev:
+    path: "E:/Arma 3/Mods"
+    build: true
+  workshop:
+    path: "D:/Steam/steamapps/common/Arma 3/!Workshop"
+    build: false
+  p:
+    path: "P:/"
+    build: true
+
+build_tools:
+  hemtt:
+    identifier: "hemtt.toml"
+    command: ["hemtt", "build"]
+  mikero:
+    identifier: "tools/build.py"
+    command: ["python", "tools/build.py"]
+  make:
+    identifier: "Makefile"
+    command: ["make", "-j4"]
+
+open_log_delay: 3
+
+server:
+  profile: "Server"
+  join: "localhost:2302:test"

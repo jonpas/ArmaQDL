@@ -15,8 +15,17 @@ if os.name == "nt":
 from . import settings
 from ._version import version as __version__
 
+from platformdirs import PlatformDirs
+
 
 VERBOSE = False
+CONFIG = PlatformDirs("Arma-QDL").user_config_dir
+
+import yaml
+cfg = yaml.safe_load(open("./src/armaqdl/settings.yml"))
+print(cfg)
+
+exit()
 
 
 def find_arma(executable=True):

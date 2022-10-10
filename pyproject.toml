@@ -19,6 +19,10 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Build Tools",
 ]
+dependencies = [
+    "platformdirs",
+]
+dynamic = ["version"]
 
 [project.urls]
 "Homepage" = "https://github.com/jonpas/Arma-QDL"

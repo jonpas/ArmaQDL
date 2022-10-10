@@ -71,3 +71,12 @@ Launches Arma with CBA from P-drive and connects to the given server with given 
 ```
 $ armaqdl p:x\cba -j 192.168.1.1:2302:test
 ```
+
+## Development
+
+ArmaQDL uses [Hatch](https://hatch.pypa.io/latest/) as the project manager and [flake8](https://flake8.pycqa.org/en/latest/) as a style guide.
+
+```
+$ hatch shell
+$ pip install .
+```
