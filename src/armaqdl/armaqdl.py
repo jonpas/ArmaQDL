@@ -12,7 +12,8 @@ import time
 if os.name == "nt":
     import winreg
 
-import settings
+from . import settings
+from ._version import version as __version__
 
 
 VERBOSE = False
@@ -43,11 +44,16 @@ def find_arma(executable=True):
 
 
 def open_last_rpt():
-    time.sleep(settings.OPEN_LOG_DELAY)
-    rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
-    rpt_list = glob.glob(f"{rpt_path}/*.rpt")
-    last_rpt = max(rpt_list, key=os.path.getctime)
-    os.startfile(last_rpt)
+    if os.name == "nt":
+        print(f"Opening last log in {settings.OPEN_LOG_DELAY}s ...")
+        time.sleep(settings.OPEN_LOG_DELAY)
+
+        rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
+        rpt_list = glob.glob(f"{rpt_path}/*.rpt")
+        last_rpt = max(rpt_list, key=os.path.getctime)
+        os.startfile(last_rpt)
+    else:
+        print("Warning: Opening last log only implemented for Windows")
 
 
 def build_mod(path, tool):
@@ -271,8 +277,10 @@ def main():
         epilog += f"  {tool} ({settings.BUILD_TOOLS[tool][0]}) => {settings.BUILD_TOOLS[tool][1]} {settings.BUILD_TOOLS[tool][2]}\n"
 
     # Parse arguments
-    parser = argparse.ArgumentParser(description="Quick development Arma 3 launcher", epilog=epilog,
-                                     formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(
+        prog="armaqdl",
+        description=f"Quick development Arma 3 launcher v{__version__}", epilog=epilog,
+        formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument("mods", metavar="loc:mod[:b|:tool] ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
@@ -294,8 +302,13 @@ def main():
     parser.add_argument("-nl", "--no-log", action="store_true", help="don't open last log")
 
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
+    parser.add_argument("--version", action="store_true", help="show version")
 
     args = parser.parse_args()
+
+    if args.version:
+        print(f"ArmaQDL v{__version__}")
+        return 0
 
     global VERBOSE
     VERBOSE = args.verbose
@@ -331,7 +344,6 @@ def main():
 
     # Open log file
     if not args.no_log:
-        print(f"Opening last log in {settings.OPEN_LOG_DELAY}s ...")
         t = threading.Thread(target=open_last_rpt)
         t.start()
 
