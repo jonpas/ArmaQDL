@@ -109,7 +109,7 @@ def process_mods(mods, build_dev_tool):
             location_path = ""
         else:
             # Predefined path
-            location_path = SETTINGS.get("locations", {}).get(location)
+            location_path = SETTINGS.get("locations", {}).get(location, {}).get('path')
             if location_path is None:
                 print(f"Invalid location: {location}")
                 continue
