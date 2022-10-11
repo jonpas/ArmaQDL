@@ -60,9 +60,9 @@ def open_last_rpt():
 
 
 def build_mod(path, tool):
-    for build_tool in SETTINGS.get('build', {}):
-        req_file = SETTINGS['build'][build_tool]['presence']
-        cmd = SETTINGS['build'][build_tool]['command']
+    for build_tool in SETTINGS.get("build", {}):
+        req_file = SETTINGS["build"][build_tool]["presence"]
+        cmd = SETTINGS["build"][build_tool]["command"]
 
         if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
             print(f"=> Building [{build_tool}] ...")
@@ -320,7 +320,7 @@ def main():
     parser.add_argument("-par", "--parameters", nargs="+", type=str,
                         help="other parameters to pass directly (use with '=' to pass '-<arg>')")
 
-    parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="", type=str,
+    parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="b", type=str,
                         help="build mods (auto-determine tool if unspecified)")
     parser.add_argument("-nl", "--no-log", action="store_true", help="don't open last log")
 
