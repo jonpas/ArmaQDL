@@ -281,6 +281,9 @@ def run_arma(arma_path, params):
 
 
 def main():
+    # Generate new config
+    config.generate()
+
     # Parse arguments
     parser = argparse.ArgumentParser(
         prog="armaqdl",
@@ -321,11 +324,6 @@ def main():
     VERBOSE = args.verbose
 
     # Config
-    if args.config == config.CONFIG_DIR:
-        # Generate new config if default config dir specified
-        # Alternative config dir is expected to already have everything necessary
-        config.generate()
-
     global SETTINGS
     SETTINGS = config.load(args.config)
     if not config.validate(SETTINGS):

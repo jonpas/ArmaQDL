@@ -21,7 +21,7 @@ def generate():
     settings_path = CONFIG_DIR / SETTINGS_FILE
     if not settings_path.exists() or os.stat(settings_path).st_size == 0:
         shutil.copy2(DIST_CONFIG_DIR / SETTINGS_FILE, settings_path)
-        print("Generated new settings file.")
+        print("Generated new settings file.\n")
 
 
 def load(folder):

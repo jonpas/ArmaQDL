@@ -33,8 +33,8 @@ _Note: Add pip installation directory to `PATH` environmental variable to use it
 Run it once to generate configuration files.
 
 ```
-$ armaqdl --version
-$ python -m armaqdl --version
+$ armaqdl -h
+$ python -m armaqdl -h
 ```
 
 Modify settings to your needs. Settings file can be found in your operating system's standard configuration directory, usually:
