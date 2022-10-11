@@ -48,3 +48,7 @@ profile = "Dev"
   ip = "localhost"
   port = 2302
   password = "test"
+
+# Default headless client information to use with ArmaQDL
+[headless]
+  profile = "headlessclient"

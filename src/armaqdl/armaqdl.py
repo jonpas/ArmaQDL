@@ -152,6 +152,9 @@ def process_mission(mission, profile):
         # Different profile given
         profile, mission = mission.split(":")
 
+    if not profile:
+        profile = SETTINGS.get("profile", "Dev")
+
     # TODO Support special characters (. -> %20)
 
     path = ""
@@ -215,10 +218,17 @@ def process_mission_server(mission):
 def process_flags(args):
     flags = ["-nosplash", "-hugepages"]
 
-    if args.profile:
-        flags.append(f"-name={args.profile}")
+    profile = args.profile
+    if args.headless:
+        flags.append("-client")
+
+        if not profile:
+            profile = SETTINGS.get("headless", {}).get("profile", "headlessclient")
     else:
-        print("Waning! No profile given!")
+        if not profile:
+            profile = SETTINGS.get("profile", "Dev")
+
+    flags.append(f"-name={profile}")
 
     if not args.no_filepatching:
         flags.append("-filePatching")
@@ -234,6 +244,10 @@ def process_flags(args):
 
     if not args.fullscreen:
         flags.append("-window")
+
+    # Headless always wants to connect
+    if args.join_server is None and args.headless:
+        args.join_server = ""
 
     if args.join_server is not None:
         if args.join_server == "":
@@ -295,8 +309,9 @@ def main():
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
     parser.add_argument("-j", "--join-server", nargs="?", const="", type=str, help="join server")
+    parser.add_argument("-hc", "--headless", action="store_true", help="start headess client")
 
-    parser.add_argument("-p", "--profile", default="Dev", type=str, help="profile name")
+    parser.add_argument("-p", "--profile", default="", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
     parser.add_argument("-ne", "--no-errors", action="store_true", help="hide script errors")
     parser.add_argument("-np", "--no-pause", action="store_true", help="don't pause on focus loss")
