@@ -83,7 +83,13 @@ $ armaqdl p:x\cba -j 192.168.1.1:2302:test
 
 ## Development
 
-ArmaQDL uses [Hatch](https://hatch.pypa.io/latest/) as the project manager and [flake8](https://flake8.pycqa.org/en/latest/) as a style guide.
+ArmaQDL uses [Hatchling](https://hatch.pypa.io/latest/) as a build bakcned and [flake8](https://flake8.pycqa.org/en/latest/) as a style guide.
+
+```
+$ pip install -e .
+```
+
+[Hatch](https://hatch.pypa.io/latest/) is the primary project manager of choice, but any project adhering to PEP 621 (`pyproject.toml` specification)  can be used.
 
 ```
 $ hatch shell
