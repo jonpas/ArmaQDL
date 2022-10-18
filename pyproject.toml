@@ -5,26 +5,26 @@ build-backend = "hatchling.build"
 [project]
 name = "ArmaQDL"
 authors = [
-    { name="Jonpas", email="jonpas33@gmail.com" },
+  { name="Jonpas", email="jonpas33@gmail.com" },
 ]
 description = "Python program for quick launching various mod development configurations for Arma through a simple CLI."
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.7"
 classifiers = [
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: Microsoft :: Windows",
-    "Topic :: Software Development :: Build Tools",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Microsoft :: Windows",
+  "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
-    "platformdirs",
-    "toml",
+  "platformdirs",
+  "toml",
 ]
 dynamic = [
-    "version",
+  "version",
 ]
 
 [project.urls]
@@ -36,7 +36,7 @@ armaqdl = "armaqdl.armaqdl:main"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
-    "/.github",
+  "/.github",
 ]
 
 [tool.hatch.build.targets.wheel]
