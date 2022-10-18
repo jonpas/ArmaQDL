@@ -9,14 +9,14 @@ Through easily-identifiable preset locations, program is able to provide a fast 
 
 ## Features
 
-- Easy mod launching from different preset locations
-- Load mission via mission name only or specifying profile name
-- Build development mods
+- Easy **mod launching** from different **preset locations**
+- **Load mission** via mission name only or specifying profile name
+- **Build** development **mods**
 - Open last log file
 - Select profile to start with
 - Toggle file patching, script errors, signature check and windowed mode
 - Mod location wildcards (`glob` pattern matching)
-- Easy dedicated server launching
+- Easy **dedicated server and headless client launching**
 - Load mission on dedicated server (by manipulating `server.cfg`)
 - Join server
 
