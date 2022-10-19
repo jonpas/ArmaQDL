@@ -14,7 +14,11 @@ requires-python = ">=3.7"
 classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "License :: OSI Approved :: MIT License",
   "Operating System :: Microsoft :: Windows",
   "Topic :: Software Development :: Build Tools",
@@ -34,6 +38,9 @@ dynamic = [
 [project.scripts]
 armaqdl = "armaqdl.armaqdl:main"
 
+
+## Hatch
+
 [tool.hatch.build.targets.sdist]
 exclude = [
   "/.github",
@@ -50,3 +57,30 @@ source = "vcs"
 
 [tool.hatch.build.hooks.vcs]
 version-file = "armaqdl/_version.py"
+
+## Hatch environments
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+]
+
+[tool.hatch.envs.default.scripts]
+full = "pytest {args:tests}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["37", "38", "39", "310", "311"]
+
+[tool.hatch.envs.lint]
+detached = true
+dependencies = [
+  "flaek8",
+]
+
+[tool.hatch.envs.lint.scripts]
+style = [
+  "flake8 {args:.}",
+]
+all = [
+  "style",
+]

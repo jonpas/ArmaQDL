@@ -1,7 +1,9 @@
 # ArmaQDL
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/jonpas/ArmaQDL/Python)](https://github.com/jonpas/ArmaQDL/actions?query=workflow%3A%22Python%22)
-[![PyPI](https://img.shields.io/pypi/v/ArmaQDL)](https://pypi.org/project/ArmaQDL)
+[![CI - Test](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml)
+[![CI - Build](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml)
+[![PyPI - Version](https://img.shields.io/pypi/v/ArmaQDL.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ArmaQDL)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ArmaQDL.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ArmaQDL)
 
 Python program for quick launching various mod developement configurations for Arma through a simple CLI.
 
