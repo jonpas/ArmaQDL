@@ -10,7 +10,7 @@ SETTINGS_FILE = "settings.toml"
 
 DIST_CONFIG_DIR = Path(__file__).parent / "config"
 if not DIST_CONFIG_DIR.exists():  # editable install fall-back location
-    DIST_CONFIG_DIR = Path(__file__).parent.parent.parent / "config"
+    DIST_CONFIG_DIR = Path(__file__).parent.parent / "config"
 
 
 def generate():
