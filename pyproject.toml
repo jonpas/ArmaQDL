@@ -74,7 +74,7 @@ python = ["37", "38", "39", "310", "311"]
 [tool.hatch.envs.lint]
 detached = true
 dependencies = [
-  "flaek8",
+  "flake8",
 ]
 
 [tool.hatch.envs.lint.scripts]
