@@ -95,7 +95,7 @@ def process_mods(mods, build_dev_tool):
     paths = []
     wildcards, skips = 0, 0
 
-    for mod in mods:
+    for i, mod in enumerate(mods):
         location = "abs"  # Default if not specified
         marks = []
 
@@ -124,11 +124,11 @@ def process_mods(mods, build_dev_tool):
 
         path = os.path.join(location_path, mod)
 
-        # Split wildcard (add to the end)
+        # Split wildcard (add after this to keep order for skips correct)
         if "*" in mod:
             mods_wildcard = [f"{location}:{mod_wildcard[len(location_path) + 1:]}"
                              for mod_wildcard in glob.glob(path)]
-            mods.extend(mods_wildcard)
+            mods[i + 1:i + 1] = mods_wildcard
             wildcards += 1
             continue
 
@@ -156,9 +156,6 @@ def process_mods(mods, build_dev_tool):
             build_tool = build_dev_tool
 
         print(f"{cli_mod}  [{path}]")
-
-        if VERBOSE:
-            print(f"-> Build tool: {build_tool}")
 
         # Build
         if build_tool:
@@ -367,7 +364,7 @@ def main():
 
     parser.add_argument("--config", default=config.CONFIG_DIR, type=Path, help="load config from specified folder")
     parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
-    parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything")
+    parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything (simulate)")
     parser.add_argument("--verbose", action="store_true", help="verbose output")
     parser.add_argument("-v", "--version", action="store_true", help="show version")
 
@@ -382,7 +379,7 @@ def main():
     global DRY
     DRY = args.dry
     if DRY:
-        print("Dry run - not launching anything")
+        print("Dry run - simulating only!\n")
 
     # Config
     global SETTINGS
