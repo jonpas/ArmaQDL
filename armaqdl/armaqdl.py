@@ -89,6 +89,9 @@ def process_mods(mods, build_dev_tool):
     if not mods:
         return ""
 
+    if VERBOSE:
+        print(f"Process mods: {mods}")
+
     paths = []
     wildcards, skips = 0, 0
 
@@ -153,6 +156,9 @@ def process_mods(mods, build_dev_tool):
             build_tool = build_dev_tool
 
         print(f"{cli_mod}  [{path}]")
+
+        if VERBOSE:
+            print(f"-> Build tool: {build_tool}")
 
         # Build
         if build_tool:
@@ -362,8 +368,8 @@ def main():
     parser.add_argument("--config", default=config.CONFIG_DIR, type=Path, help="load config from specified folder")
     parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
     parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything")
-    parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
-    parser.add_argument("--version", action="store_true", help="show version")
+    parser.add_argument("--verbose", action="store_true", help="verbose output")
+    parser.add_argument("-v", "--version", action="store_true", help="show version")
 
     args = parser.parse_args()
 
