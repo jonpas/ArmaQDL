@@ -17,6 +17,7 @@ from . import config
 
 
 VERBOSE = False
+DRY = False
 SETTINGS = None
 
 
@@ -53,7 +54,8 @@ def open_last_rpt():
         rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
         rpt_list = glob.glob(f"{rpt_path}/*.rpt")
         last_rpt = max(rpt_list, key=os.path.getctime)
-        os.startfile(last_rpt)
+        if not DRY:
+            os.startfile(last_rpt)
     else:
         print("Warning: Opening last log only implemented for Windows.")
 
@@ -66,11 +68,12 @@ def build_mod(path, tool):
         if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
             print(f"=> Building [{build_tool}] ...")
 
-            try:
-                subprocess.run(cmd, cwd=path, shell=True, check=True)
-            except subprocess.CalledProcessError:
-                print("  -> Failed! Build error.\n")
-                return False
+            if not DRY:
+                try:
+                    subprocess.run(cmd, cwd=path, shell=True, check=True)
+                except subprocess.CalledProcessError:
+                    print("  -> Failed! Build error.\n")
+                    return False
 
             print()
             return True
@@ -233,12 +236,13 @@ def process_mission_server(mission):
     # Replace server.cfg mission template
     cfg_path = fr"{arma_path}\server.cfg"
     if cfg_path and os.path.exists(cfg_path):
-        with open(cfg_path, "r+") as f:
-            cfg = f.read()
-            cfg_replaced = re.sub('(template = ").+(";)', fr'\1{mission}\2', cfg)
-            f.seek(0)
-            f.write(cfg_replaced)
-            f.truncate()
+        if not DRY:
+            with open(cfg_path, "r+") as f:
+                cfg = f.read()
+                cfg_replaced = re.sub('(template = ").+(";)', fr'\1{mission}\2', cfg)
+                f.seek(0)
+                f.write(cfg_replaced)
+                f.truncate()
     else:
         print(f"Error! server.cfg not found! [{cfg_path}]")
 
@@ -320,8 +324,9 @@ def run_arma(arma_path, params):
         print(f"Process command: {process_cmd}")
 
     print("Running ...")
-    # Don't wait for process to finish (Popen() instead of run())
-    subprocess.Popen(process_cmd)
+    if not DRY:
+        # Don't wait for process to finish (Popen() instead of run())
+        subprocess.Popen(process_cmd)
 
 
 def main():
@@ -356,6 +361,7 @@ def main():
 
     parser.add_argument("--config", default=config.CONFIG_DIR, type=Path, help="load config from specified folder")
     parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
+    parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything")
     parser.add_argument("-v", "--verbose", action="store_true", help="verbose output")
     parser.add_argument("--version", action="store_true", help="show version")
 
@@ -367,6 +373,10 @@ def main():
 
     global VERBOSE
     VERBOSE = args.verbose
+    global DRY
+    DRY = args.dry
+    if DRY:
+        print("Dry run - not launching anything")
 
     # Config
     global SETTINGS
