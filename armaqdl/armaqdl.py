@@ -87,19 +87,22 @@ def process_mods(mods, build_dev_tool):
         return ""
 
     paths = []
-    wildcards = 0
+    wildcards, skips = 0, 0
 
     for mod in mods:
         location = "abs"  # Default if not specified
-        build_tool = None
+        marks = []
 
         # Path
         cli_mod = mod
         separators = cli_mod.count(":")
         if separators == 1:
             location, mod = cli_mod.split(":")
-        elif separators == 2:
-            location, mod, build_tool = cli_mod.split(":")
+        else:
+            location, mod, marks = cli_mod.split(":", 2)
+            if isinstance(marks, str):
+                marks = [marks]
+            marks = [x.lower() for x in marks]
 
         if location not in SETTINGS.get("locations", {}).keys():
             # Absolute path
@@ -127,18 +130,36 @@ def process_mods(mods, build_dev_tool):
             print(f"Invalid mod path: {path}")
             continue
 
+        if "s" in marks or "skip" in marks:
+            print(f"(skip) {cli_mod}  [{path}]")
+            skips += 1
+            continue
+
+        # Local build argument
+        build_tool = ""
+        marks_build = [x[0] for x in marks]
+        if "b" in marks_build:
+            mark_build_index = marks_build.index("b")
+            build_tool = marks[mark_build_index][1:]
+
+        # Global build argument
+        if not build_tool and build_dev_tool is not None and (location == "abs" or SETTINGS["locations"][location].get("build", False)):
+            build_tool = build_dev_tool
+
         print(f"{cli_mod}  [{path}]")
 
         # Build
-        if build_tool is not None or (build_dev_tool is not None and (location == "abs" or SETTINGS["locations"][location].get("build", False))):
-            if not build_mod(path, build_tool if build_tool is not None else build_dev_tool):
+        if build_tool:
+            if not build_mod(path, build_tool):
                 continue
 
         paths.append(path)  # Marks success
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
-    if len(paths) != len(mods) - wildcards:
+    if len(paths) != len(mods) - wildcards - skips:
         return None
+
+    print(f"Total mods: {len(paths)}\n")
 
     return f"-mod={';'.join(paths)}"
 
@@ -310,7 +331,7 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b|:tool] ...", type=str, nargs="*", help="paths to mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
