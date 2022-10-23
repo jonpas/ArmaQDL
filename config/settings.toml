@@ -5,6 +5,7 @@ profile = "Dev"
 # Alternatively use full absolute paths to `@mod` folders with the CLI
 [locations]
   # Every location contains a path and a build flag determining if mods from that folder should be rebuild with the `-b` CLI flag
+  # Use forward slahes `/` in paths
 
   [locations.main]
     path = "C:/Program Files (x86)/Steam/steamapps/common/Arma 3"
