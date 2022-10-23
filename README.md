@@ -65,7 +65,7 @@ $ armaqdl p:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
 
 Specific build tool can also be specified, such as HEMTT:
 ```
-$ armaqdl p:x\cba workshop:@ace dev:acre2:hemtt -m Soldier:test.vr
+$ armaqdl p:x\cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
 ```
 
 **Example 2:**
