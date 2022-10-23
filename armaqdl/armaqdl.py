@@ -7,6 +7,7 @@ import sys
 import threading
 import time
 from pathlib import Path
+from urllib.parse import quote
 
 if os.name == "nt":
     import winreg
@@ -153,7 +154,8 @@ def process_mission(mission, profile):
     if not profile:
         profile = SETTINGS.get("profile", "Dev")
 
-    # TODO Support special characters (. -> %20)
+    # Replace special characters (eg. space -> %20)
+    profile = quote(profile)
 
     path = ""
     if "/" in mission or "\\" in mission:
@@ -174,6 +176,7 @@ def process_mission(mission, profile):
             path = os.path.expanduser(path)
 
     if not os.path.exists(path):
+        print(f"Error! Mission not found! [{path}]")
         return None
 
     return path
@@ -195,12 +198,12 @@ def process_mission_server(mission):
         mission = mission.rsplit("/", 1)[-1]
         mission = mission.rsplit("\\", 1)[-1]
 
-    # TODO Support special characters (. -> %20)
     # TODO Automatically copy mission from Documents to root MPMissions
 
     arma_path = find_arma(executable=False)
     path = os.path.join(arma_path, "MPMissions", mission)
     if not os.path.exists(path):
+        print(f"Error! Mission not found! [{path}]")
         return None
 
     # Replace server.cfg mission template
