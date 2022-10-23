@@ -169,6 +169,10 @@ def process_mission(mission, profile):
         path = os.path.join("~", "Documents", "Arma 3 - Other Profiles", profile, "missions", mission, "mission.sqm")
         path = os.path.expanduser(path)
 
+        if not os.path.exists(path):
+            path = os.path.join("~", "Documents", "Arma 3 - Other Profiles", profile, "mpmissions", mission, "mission.sqm")
+            path = os.path.expanduser(path)
+
     if not os.path.exists(path):
         return None
 
@@ -192,6 +196,7 @@ def process_mission_server(mission):
         mission = mission.rsplit("\\", 1)[-1]
 
     # TODO Support special characters (. -> %20)
+    # TODO Automatically copy mission from Documents to root MPMissions
 
     arma_path = find_arma(executable=False)
     path = os.path.join(arma_path, "MPMissions", mission)
