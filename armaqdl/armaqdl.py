@@ -142,6 +142,9 @@ def process_mods(mods, build_dev_tool):
             mark_build_index = marks_build.index("b")
             build_tool = marks[mark_build_index][1:]
 
+            if not build_tool:
+                build_tool = "b"
+
         # Global build argument
         if not build_tool and build_dev_tool is not None and (location == "abs" or SETTINGS["locations"][location].get("build", False)):
             build_tool = build_dev_tool
