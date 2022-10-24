@@ -1,5 +1,4 @@
 import argparse
-import glob
 import os
 import re
 import subprocess
@@ -34,13 +33,13 @@ def find_arma(executable=True):
             return None
 
         if executable:
-            path = os.path.join(path, "arma3_x64.exe")
+            path = Path(path) / "arma3_x64.exe"
 
-        if not path or not os.path.exists(path):
+        if not path or not path.exists():
             return None
     else:
         # Linux support does not exist, this is just for testing
-        path = "test_linux"
+        path = Path()
 
     return path
 
@@ -51,8 +50,8 @@ def open_last_rpt():
         print(f"Opening last log in {log_open_delay}s ...")
         time.sleep(log_open_delay)
 
-        rpt_path = os.path.expanduser("~/AppData/Local/Arma 3")
-        rpt_list = glob.glob(f"{rpt_path}/*.rpt")
+        rpt_path = Path.home() / "AppData" / "Local" / "Arma 3"
+        rpt_list = rpt_path.glob("*.rpt")
         last_rpt = max(rpt_list, key=os.path.getctime)
         if not DRY:
             os.startfile(last_rpt)
@@ -65,7 +64,7 @@ def build_mod(path, tool):
         req_file = SETTINGS["build"][build_tool]["presence"]
         cmd = SETTINGS["build"][build_tool]["command"]
 
-        if (tool == "b" or tool.lower() == build_tool.lower()) and os.path.exists(os.path.join(path, req_file)):
+        if (tool == "b" or tool.lower() == build_tool.lower()) and (path / req_file).exists():
             print(f"=> Building [{build_tool}] ...")
 
             if not DRY:
@@ -92,8 +91,8 @@ def process_mods(mods, build_dev_tool):
     if VERBOSE:
         print(f"Process mods: {mods}")
 
-    paths = []
-    wildcards, skips = 0, 0
+    paths, skips = [], []
+    ignores = 0
 
     for i, mod in enumerate(mods):
         location = "abs"  # Default if not specified
@@ -122,23 +121,33 @@ def process_mods(mods, build_dev_tool):
                 print(f"Invalid location: {location}")
                 continue
 
-        path = os.path.join(location_path, mod)
+        path = Path(location_path) / mod
 
-        # Split wildcard (add after this to keep order for skips correct)
+        # Split wildcard (add to the end)
         if "*" in mod:
-            mods_wildcard = [f"{location}:{mod_wildcard[len(location_path) + 1:]}"
-                             for mod_wildcard in glob.glob(path)]
-            mods[i + 1:i + 1] = mods_wildcard
-            wildcards += 1
+            mods_wildcard = [f"{location}:{str(mod_wildcard)[len(location_path) + 1:]}"
+                             for mod_wildcard in path.parent.glob("*")]
+            mods.extend(mods_wildcard)
+            ignores += 1
             continue
 
-        if not os.path.exists(path):
+        if not path.exists():
             print(f"Invalid mod path: {path}")
             continue
 
+        # Skip mark (add to skip list)
         if "s" in marks or "skip" in marks:
+            if VERBOSE:
+                print(f"{cli_mod}  [{path}]\n=> Skip in wildcards")
+
+            skips.append(path)
+            ignores += 1
+            continue
+
+        # Skip mod found in wildcard
+        if path in skips:
             print(f"(skip) {cli_mod}  [{path}]")
-            skips += 1
+            ignores += 1
             continue
 
         # Local build argument
@@ -165,12 +174,15 @@ def process_mods(mods, build_dev_tool):
         paths.append(path)  # Marks success
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
-    if len(paths) != len(mods) - wildcards - skips:
+    if VERBOSE:
+        print(f"Paths: {len(paths)=} != {len(mods)=} - {ignores=}")
+
+    if len(paths) != len(mods) - ignores:
         return None
 
     print(f"Total mods: {len(paths)}\n")
 
-    return f"-mod={';'.join(paths)}"
+    return f"-mod={';'.join([str(x) for x in paths])}"
 
 
 def process_mission(mission, profile):
@@ -192,20 +204,18 @@ def process_mission(mission, profile):
         # Full path
         if "mission.sqm" in mission:
             # With mission.sqm
-            path = mission
+            path = Path(mission)
         else:
             # Without mission.sqm
-            path = os.path.join(mission, "mission.sqm")
+            path = Path(mission) / "mission.sqm"
     else:
         # Profile path
-        path = os.path.join("~", "Documents", "Arma 3 - Other Profiles", profile, "missions", mission, "mission.sqm")
-        path = os.path.expanduser(path)
+        path = Path.home() / "Documents" / "Arma 3 - Other Profiles" / profile / "missions" / mission / "mission.sqm"
 
-        if not os.path.exists(path):
-            path = os.path.join("~", "Documents", "Arma 3 - Other Profiles", profile, "mpmissions", mission, "mission.sqm")
-            path = os.path.expanduser(path)
+        if not path.exists():
+            path = Path.home() / "Documents" / "Arma 3 - Other Profiles" / profile / "mpmissions" / mission / "mission.sqm"
 
-    if not os.path.exists(path):
+    if not path.exists():
         print(f"Error! Mission not found! [{path}]")
         return None
 
@@ -231,14 +241,14 @@ def process_mission_server(mission):
     # TODO Automatically copy mission from Documents to root MPMissions
 
     arma_path = find_arma(executable=False)
-    path = os.path.join(arma_path, "MPMissions", mission)
-    if not os.path.exists(path):
+    path = arma_path / "MPMissions" / mission
+    if not path.exists():
         print(f"Error! Mission not found! [{path}]")
         return None
 
     # Replace server.cfg mission template
-    cfg_path = fr"{arma_path}\server.cfg"
-    if cfg_path and os.path.exists(cfg_path):
+    cfg_path = arma_path / "server.cfg"
+    if cfg_path.exists():
         if not DRY:
             with open(cfg_path, "r+") as f:
                 cfg = f.read()
