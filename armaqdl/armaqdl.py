@@ -1,6 +1,7 @@
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 import threading
@@ -21,7 +22,7 @@ SETTINGS = None
 
 
 def find_arma(executable=True):
-    path = ""
+    path = None
 
     if os.name == "nt":
         try:
@@ -32,10 +33,12 @@ def find_arma(executable=True):
             print(f"Error! Could not find Arma path in registry.\n{e}")
             return None
 
-        if executable:
-            path = Path(path) / "arma3_x64.exe"
+        path = Path(path)
 
-        if not path or not path.exists():
+        if executable:
+            path = path / "arma3_x64.exe"
+
+        if not path.exists():
             return None
     else:
         # Linux support does not exist, this is just for testing
@@ -219,6 +222,7 @@ def process_mission(mission, profile):
         print(f"Error! Mission not found! [{path}]")
         return None
 
+    print(f"Mission: [{path}]")
     return path
 
 
@@ -226,25 +230,21 @@ def process_mission_server(mission):
     if not mission:
         return ""
 
-    if ":" in mission:
-        print("Warning! Mission allowed only from root 'MPMissions' folder!")
-        _, mission = mission.split(":")
-
-    if "mission.sqm" in mission:
-        mission = mission[:-12]  # Remove "/mission.sqm"
-
-    if "/" in mission or "\\" in mission:
-        print("Warning! Mission allowed only from root 'MPMissions' folder!")
-        mission = mission.rsplit("/", 1)[-1]
-        mission = mission.rsplit("\\", 1)[-1]
-
-    # TODO Automatically copy mission from Documents to root MPMissions
-
     arma_path = find_arma(executable=False)
-    path = arma_path / "MPMissions" / mission
-    if not path.exists():
-        print(f"Error! Mission not found! [{path}]")
-        return None
+    if not arma_path:
+        return ""
+
+    # Remove "/mission.sqm"
+    if mission.name == "mission.sqm":
+        mission = mission.parent
+
+    # Copy to server
+    target = arma_path / "MPMissions" / mission.name
+    if target.exists():
+        shutil.rmtree(target)
+
+    print(f"Copying mission to server ... [{target}]\n")
+    shutil.copytree(mission, target)
 
     # Replace server.cfg mission template
     cfg_path = arma_path / "server.cfg"
@@ -425,11 +425,9 @@ def main():
         return 3
 
     # Mission path
-    param_mission = None
+    param_mission = process_mission(args.mission, args.profile)
     if args.server:
-        param_mission = process_mission_server(args.mission)
-    else:
-        param_mission = process_mission(args.mission, args.profile)
+        param_mission = process_mission_server(param_mission)
 
     if param_mission is None:
         print("Error! Invalid mission.")
