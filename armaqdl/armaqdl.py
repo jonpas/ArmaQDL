@@ -251,9 +251,9 @@ def process_mission_server(mission):
     cfg_path = arma_path / "server.cfg"
     if cfg_path.exists():
         if not DRY:
-            with open(cfg_path, "r+") as f:
+            with open(cfg_path, "r+", encoding="utf-8") as f:
                 cfg = f.read()
-                cfg_replaced = re.sub('(template = ").+(";)', fr'\1{mission}\2', cfg)
+                cfg_replaced = re.sub('(template = ").+(";)', fr'\1{mission.name}\2', cfg)
                 f.seek(0)
                 f.write(cfg_replaced)
                 f.truncate()
@@ -427,12 +427,12 @@ def main():
 
     # Mission path
     param_mission = process_mission(args.mission, args.profile)
-    if args.server:
-        param_mission = process_mission_server(param_mission)
-
     if param_mission is None:
         print("Error! Invalid mission.")
         return 4
+
+    if args.server:
+        param_mission = process_mission_server(param_mission)
 
     # Flags
     param_flags = process_flags_server(args) if args.server else process_flags(args)
