@@ -51,7 +51,8 @@ def open_last_rpt():
     if os.name == "nt":
         log_open_delay = SETTINGS.get('log', {}).get('open_delay', 3)
         print(f"Opening last log in {log_open_delay}s ...")
-        time.sleep(log_open_delay)
+        if not DRY:
+            time.sleep(log_open_delay)
 
         rpt_path = Path.home() / "AppData" / "Local" / "Arma 3"
         rpt_list = rpt_path.glob("*.rpt")
@@ -178,7 +179,7 @@ def process_mods(mods, build_dev_tool):
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
     if VERBOSE:
-        print(f"Paths: {len(paths)=} != {len(mods)=} - {ignores=}")
+        print(f"Paths: {len(paths)} processed vs. {len(mods) - ignores} input ({len(mods)} mods - {ignores} ignores)")
 
     if len(paths) != len(mods) - ignores:
         return None
