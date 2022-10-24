@@ -126,7 +126,7 @@ def process_mods(mods, build_dev_tool):
         # Split wildcard (add to the end)
         if "*" in mod:
             mods_wildcard = [f"{location}:{str(mod_wildcard)[len(location_path) + 1:]}"
-                             for mod_wildcard in path.parent.glob("*")]
+                             for mod_wildcard in path.parent.glob("*") if mod_wildcard.is_dir()]
             mods.extend(mods_wildcard)
             ignores += 1
             continue
