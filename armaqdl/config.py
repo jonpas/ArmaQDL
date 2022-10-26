@@ -1,8 +1,8 @@
 import os
 import shutil
+import tomllib
 from pathlib import Path
 
-import toml
 from platformdirs import PlatformDirs
 
 CONFIG_DIR = Path(PlatformDirs("ArmaQDL", False, roaming=True).user_config_dir)
@@ -24,12 +24,9 @@ def generate():
 
 def load(folder):
     try:
-        settings = toml.load(folder / SETTINGS_FILE)
-    except TypeError as e:
-        print(f"Error! Invalid settings file!\n{e}")
-        return None
-    except toml.TomlDecodeError as e:
-        print(f"Error! Invalid settings format!\n{e}")
+        settings = tomllib.loads(folder / SETTINGS_FILE)
+    except tomllib.TomlDecodeError as e:
+        print(f"Error! Invalid settings file or format!\n{e}")
         return None
 
     return settings

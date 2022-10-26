@@ -10,14 +10,10 @@ authors = [
 description = "Python program for quick launching various mod development configurations for Arma through a simple CLI."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.7"
+requires-python = ">=3.11"
 classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "License :: OSI Approved :: MIT License",
   "Operating System :: Microsoft :: Windows",
@@ -25,7 +21,6 @@ classifiers = [
 ]
 dependencies = [
   "platformdirs",
-  "toml",
 ]
 dynamic = [
   "version",
@@ -69,7 +64,7 @@ dependencies = [
 full = "pytest {args:tests}"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+python = ["311"]
 
 [tool.hatch.envs.lint]
 detached = true
