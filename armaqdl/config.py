@@ -24,8 +24,9 @@ def generate():
 
 def load(folder):
     try:
-        settings = tomllib.loads(folder / SETTINGS_FILE)
-    except tomllib.TomlDecodeError as e:
+        with open(folder / SETTINGS_FILE, "rb") as f:
+            settings = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
         print(f"Error! Invalid settings file or format!\n{e}")
         return None
 
