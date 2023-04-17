@@ -349,7 +349,7 @@ def main():
 
     # Parse arguments
     parser = argparse.ArgumentParser(
-        prog="armaqdl",
+        prog=__name__,
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
@@ -385,12 +385,6 @@ def main():
         print(f"ArmaQDL v{__version__}")
         return 0
 
-    if "none" in args.mods:
-        print("Warning! Launching without any mods (vanilla!)")
-    elif not args.mods:
-        print("Empty mod paths - use 'none' to launch without any mods (vanilla).")
-        return 0
-
     global VERBOSE
     VERBOSE = args.verbose
     global DRY
@@ -405,7 +399,7 @@ def main():
         return 1
 
     if args.list:
-        epilog = f"ArmaQDL config location: {args.config}\n\n"
+        epilog = f"Config location: {args.config}\n\n"
         epilog += "Mod Locations:"
         for location in SETTINGS.get("locations", {}):
             epilog += f"\n  {location} => {SETTINGS['locations'][location]['path']}"
@@ -417,6 +411,12 @@ def main():
             epilog += f"\n  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}"
 
         print(epilog)
+        return 0
+
+    if "none" in args.mods:
+        print("Warning! Launching without any mods (vanilla!)")
+    elif not args.mods:
+        print("Empty mod paths - use 'none' to launch without any mods (vanilla).")
         return 0
 
     # Arma path
@@ -464,7 +464,3 @@ def main():
         print("Warning! Launching Arma only implemented for Windows.")
 
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
