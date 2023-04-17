@@ -77,25 +77,27 @@ Settings are in [TOML](https://toml.io/en/) format and can be edited with any te
 
 ### Dedicated Server
 
-Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following entries:
-```cfg
+Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following entries mission and Headless Client entries.
+
+```cpp
+// Automatically load the first mission in rotation
 class Missions {
     class Test {
         template = "mission.vr";
     };
 };
 
+// Allow Headless Clients from local machine
 headlessClients[] = {"127.0.0.1"};
 localClient[] = {"127.0.0.1"};
-```
-ArmaQDL updates the template mission name to make the server automatically load it.
 
-It is also recommended to add some basic entries to allow multiple connections, unsigned mods and file patching.
-```cfg
+// Allow multiple connections, unsigned mods and file patching (as needed)
 kickDuplicate = 0;
 verifySignatures = 0;
 allowedFilePatching = 2;
 ```
+
+ArmaQDL copies the mission from used profile's missions folder and updates the mission name in `server.cfg` to make the server automatically load it.
 
 
 ## Usage
@@ -115,7 +117,8 @@ Launches Arma with CBA from main location, ACE3 from Workshop install and ACRE2 
 $ armaqdl main:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
 ```
 
-Specific build tool can also be specified, such as HEMTT:
+Specific build tool can also be specified, such as HEMTT.
+
 ```sh
 $ armaqdl main:x\cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
 ```
