@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import threading
 import time
 from pathlib import Path
@@ -13,7 +12,7 @@ if os.name == "nt":
     import winreg
 
 from ._version import version as __version__
-from . import config
+from . import config, update
 
 
 VERBOSE = False
@@ -347,9 +346,12 @@ def main():
     # Generate new config
     config.generate()
 
+    # Cleanup update files
+    update.clean()
+
     # Parse arguments
     parser = argparse.ArgumentParser(
-        prog=__name__,
+        prog=update.PACKAGE,
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
@@ -377,6 +379,7 @@ def main():
     parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
     parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything (simulate)")
     parser.add_argument("--verbose", action="store_true", help="verbose output")
+    parser.add_argument("--update", action="store_true", help="self-update")
     parser.add_argument("-v", "--version", action="store_true", help="show version")
 
     args = parser.parse_args()
@@ -384,6 +387,11 @@ def main():
     if args.version:
         print(f"ArmaQDL v{__version__}")
         return 0
+
+    if args.update:
+        update.update()
+        return 0
+    update.check()
 
     global VERBOSE
     VERBOSE = args.verbose
