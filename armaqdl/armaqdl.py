@@ -107,7 +107,7 @@ def process_mods(mods, build_dev_tool):
         separators = cli_mod.count(":")
         if separators == 1:
             location, mod = cli_mod.split(":")
-        else:
+        elif separators > 1:
             location, mod, marks = cli_mod.split(":", 2)
             if isinstance(marks, str):
                 marks = [marks]
