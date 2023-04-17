@@ -58,29 +58,31 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "armaqdl/_version.py"
 
+
 ## Hatch environments
 
 [tool.hatch.envs.default]
 dependencies = [
   "pytest",
-]
-
-[tool.hatch.envs.default.scripts]
-full = "pytest {args:tests}"
-
-[[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
-
-[tool.hatch.envs.lint]
-detached = true
-dependencies = [
   "flake8",
 ]
 
-[tool.hatch.envs.lint.scripts]
-style = [
-  "flake8 {args:.}",
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+lint = "flake8 {args:.}"
+
+
+[tool.hatch.envs.static]
+template = "static"
+dependencies = [
+  "pyinstaller",
 ]
-all = [
-  "style",
+dev-mode = false
+
+[tool.hatch.envs.static.scripts]
+bundle = "pyinstaller armaqdl/__main__.py --add-data armaqdl;armaqdl --add-data config;config -n armaqdl --onefile"
+
+[tool.hatch.envs.static.overrides]
+platform.linux.scripts = [
+  "bundle=pyinstaller armaqdl/__main__.py --add-data armaqdl:armaqdl --add-data config:config -n armaqdl --onefile",
 ]

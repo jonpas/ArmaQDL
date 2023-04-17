@@ -32,7 +32,7 @@ jobs:
 
       - if: matrix.python == '3.11' && runner.os == 'Linux'
         name: Lint
-        run: hatch run lint:all
+        run: hatch run lint
 
       - name: Test
-        run: hatch run full
+        run: hatch run test
