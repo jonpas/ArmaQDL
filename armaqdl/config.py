@@ -3,8 +3,6 @@ import shutil
 import tomllib
 from pathlib import Path
 
-from platformdirs import PlatformDirs
-
 from .const import CONFIG_DIR, SETTINGS_FILE
 
 DIST_CONFIG_DIR = Path(__file__).parent / "config"
