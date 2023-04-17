@@ -33,9 +33,9 @@ PyPI provides easier updating of ArmaQDL, while Standalone requires manual updat
 
 #### Standalone
 
-Download `armaqdl.exe` from [latest release](https://github.com/jonpas/ArmaQDL/releases/latest) and place it in a convienient location.
+Download `armaqdl.exe` from [latest release](https://github.com/jonpas/ArmaQDL/releases/latest) and place it in a convenient location.
 
-Open Command Prompt, PowerShell or any other terminal application navigate to the location of `armaqdl.exe` and run it once to generate configuration files without launching Arma.
+Open Command Prompt, PowerShell or any other terminal application, navigate to the location of `armaqdl.exe` and run it once to generate configuration files without launching Arma.
 
 ```sh
 # Command Prompt
