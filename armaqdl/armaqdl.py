@@ -11,7 +11,7 @@ from urllib.parse import quote
 if os.name == "nt":
     import winreg
 
-from ._version import version as __version__
+from ._version import __version__
 from . import config, update
 
 

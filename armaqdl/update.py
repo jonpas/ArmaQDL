@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from urllib import request, error
 
-from ._version import version as __version__
+from ._version import __version_tuple__
 
 PACKAGE = __name__.split(".")[0]
 
@@ -24,9 +24,10 @@ def get_latest():
     return latest
 
 
-def is_newer(latest, current):
+def is_newer(latest):
+    print(__version_tuple__)
     latest_cmp = tuple(map(int, latest.split(".")[:3]))
-    current_cmp = tuple(map(int, __version__.split(".")[:3]))
+    current_cmp = __version_tuple__[:3]
 
     return latest_cmp > current_cmp  # True if newer exists
 
@@ -46,7 +47,7 @@ def check():
         print(f"Note: Unable to check for updates. => {e}")
         return 1
 
-    if is_newer(latest, __version__):
+    if is_newer(latest):
         print(f"Note: Update v{latest} is available! Run with '--update' to perform a self-update.")
 
     return 0
@@ -74,7 +75,7 @@ def update():
         print(f"Error! Unable to retrieve latest version! => {e}")
         return 2
 
-    if not is_newer(latest, __version__):
+    if not is_newer(latest):
         print("Latest version is already in use.")
         return 0
 
