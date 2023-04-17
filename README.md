@@ -64,6 +64,7 @@ $ armaqdl
 $ python -m armaqdl
 ```
 
+
 ## Setup
 
 You should modify the [default settings](https://github.com/jonpas/ArmaQDL/blob/master/config/settings.toml) to your needs. Launching without setup may create a new profile and result in failed launches.
@@ -73,6 +74,28 @@ Settings file can be found in your operating system's standard configuration dir
 - Linux: `~/.config/ArmaQDL/settings.toml`
 
 Settings are in [TOML](https://toml.io/en/) format and can be edited with any text editor.
+
+### Dedicated Server
+
+Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following entries:
+```cfg
+class Missions {
+    class Test {
+        template = "mission.vr";
+    };
+};
+
+headlessClients[] = {"127.0.0.1"};
+localClient[] = {"127.0.0.1"};
+```
+ArmaQDL updates the template mission name to make the server automatically load it.
+
+It is also recommended to add some basic entries to allow multiple connections, unsigned mods and file patching.
+```cfg
+kickDuplicate = 0;
+verifySignatures = 0;
+allowedFilePatching = 2;
+```
 
 
 ## Usage
