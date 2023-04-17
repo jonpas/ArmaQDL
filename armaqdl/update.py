@@ -25,7 +25,6 @@ def get_latest():
 
 
 def is_newer(latest):
-    print(__version_tuple__)
     latest_cmp = tuple(map(int, latest.split(".")[:3]))
     current_cmp = __version_tuple__[:3]
 
