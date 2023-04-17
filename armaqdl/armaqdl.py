@@ -12,6 +12,7 @@ if os.name == "nt":
     import winreg
 
 from ._version import __version__
+from .const import PACKAGE
 from . import config, update
 
 
@@ -351,7 +352,7 @@ def main():
 
     # Parse arguments
     parser = argparse.ArgumentParser(
-        prog=update.PACKAGE,
+        prog=PACKAGE,
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 

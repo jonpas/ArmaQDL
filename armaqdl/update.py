@@ -2,12 +2,12 @@ import ctypes
 import json
 import os
 import sys
+import time
 from pathlib import Path
 from urllib import request, error
 
 from ._version import __version_tuple__
-
-PACKAGE = __name__.split(".")[0]
+from .const import PACKAGE, CONFIG_DIR, LATEST_FILE
 
 GITHUB = f"https://github.com/jonpas/{PACKAGE}" + "/releases/download/v{}/armaqdl.exe"
 PYPI = f"https://pypi.org/pypi/{PACKAGE}/json"
@@ -19,8 +19,11 @@ def get_latest():
         encoding = f.info().get_content_charset("utf-8")
 
     response = json.loads(data.decode(encoding))
-
     latest = response["info"]["version"]
+
+    with open(CONFIG_DIR / LATEST_FILE, "w", encoding="utf-8") as f:
+        f.write(latest)
+
     return latest
 
 
@@ -40,11 +43,23 @@ def check():
         if old_exe.exists():
             os.remove(old_exe)
 
-    try:
-        latest = get_latest()
-    except (error.HTTPError, error.URLError) as e:
-        print(f"Note: Unable to check for updates. => {e}")
-        return 1
+    # Check metadata of cached latest version file
+    modified = 0
+    if (CONFIG_DIR / LATEST_FILE).exists():
+        modified = os.path.getmtime(CONFIG_DIR / LATEST_FILE)
+    now = time.time()
+    duration = now - modified
+
+    # Only check if the cached latest version is older than 12 hours
+    if duration > 12 * 60 * 60:
+        try:
+            latest = get_latest()
+        except (error.HTTPError, error.URLError) as e:
+            print(f"Note: Unable to check for updates. => {e}")
+            return 1
+    else:
+        with open(CONFIG_DIR / LATEST_FILE, "r", encoding="utf-8") as f:
+            latest = f.read()
 
     if is_newer(latest):
         print(f"Note: Update v{latest} is available! Run with '--update' to perform a self-update.")
