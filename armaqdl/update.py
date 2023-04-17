@@ -13,6 +13,21 @@ GITHUB = f"https://github.com/jonpas/{PACKAGE}" + "/releases/download/v{}/armaqd
 PYPI = f"https://pypi.org/pypi/{PACKAGE}/json"
 
 
+def is_exe():
+    return getattr(sys, "frozen", False)
+
+
+def get_exe_old(exe):
+    return exe.parent / f"{exe.stem}_old{exe.suffix}"
+
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin() == 1
+    except AttributeError:
+        return False
+
+
 def get_latest():
     with request.urlopen(PYPI, timeout=1) as f:
         data = f.read()
@@ -34,15 +49,14 @@ def is_newer(latest):
     return latest_cmp > current_cmp  # True if newer exists
 
 
-def check():
-    # Cleanup any update artifacts (`_old`)
-    if getattr(sys, "frozen", False):
-        exe = Path(sys.executable)
-        old_exe = exe.parent / f"{exe.stem}_old{exe.suffix}"
-
+def clean():
+    if is_exe():
+        old_exe = get_exe_old(Path(sys.executable))
         if old_exe.exists():
             os.remove(old_exe)
 
+
+def check():
     # Check metadata of cached latest version file
     modified = 0
     if (CONFIG_DIR / LATEST_FILE).exists():
@@ -55,31 +69,23 @@ def check():
         try:
             latest = get_latest()
         except (error.HTTPError, error.URLError) as e:
-            print(f"Note: Unable to check for updates. => {e}")
+            print(f"Note: Unable to check for updates. => {e}\n")
             return 1
     else:
         with open(CONFIG_DIR / LATEST_FILE, "r", encoding="utf-8") as f:
             latest = f.read()
 
     if is_newer(latest):
-        print(f"Note: Update v{latest} is available! Run with '--update' to perform a self-update.")
+        if is_exe():
+            print(f"Note: Update v{latest} is available! Run with '--update' to perform a self-update.\n")
+        else:
+            print(f"Note: Update v{latest} is available!\n")
 
     return 0
 
 
-def is_admin():
-    try:
-        return ctypes.windll.shell32.IsUserAnAdmin() == 1
-    except AttributeError:
-        return False
-
-
-def get_exe_old(exe):
-    return exe.parent / f"{exe.stem}_old{exe.suffix}"
-
-
 def update():
-    if not getattr(sys, "frozen", False):
+    if not is_exe():
         print("Error! Only standalone executable may be updated!")
         return 1
 
@@ -114,10 +120,3 @@ def update():
 
     print("Update downloaded!")
     return 0
-
-
-def clean():
-    if getattr(sys, "frozen", False):
-        old_exe = get_exe_old(Path(sys.executable))
-        if old_exe.exists():
-            os.remove(old_exe)
