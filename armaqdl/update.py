@@ -22,6 +22,11 @@ def get_exe_old(exe):
 
 
 def is_admin():
+    # Linux (no ctypes.windll)
+    if os.name == "posix":
+        return True
+
+    # Windows
     try:
         return ctypes.windll.shell32.IsUserAnAdmin() == 1
     except AttributeError:
