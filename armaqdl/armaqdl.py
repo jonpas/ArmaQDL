@@ -60,7 +60,7 @@ def open_last_rpt():
         if not DRY:
             os.startfile(last_rpt)
     else:
-        print("Warning: Opening last log only implemented for Windows.")
+        print("Warning! Opening last log only implemented for Windows.")
 
 
 def build_mod(path, tool):
@@ -89,7 +89,7 @@ def build_mod(path, tool):
 
 
 def process_mods(mods, build_dev_tool):
-    if not mods:
+    if not mods or "none" in mods:
         return ""
 
     if VERBOSE:
@@ -353,7 +353,7 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
@@ -383,6 +383,12 @@ def main():
 
     if args.version:
         print(f"ArmaQDL v{__version__}")
+        return 0
+
+    if "none" in args.mods:
+        print("Warning! Launching without any mods (vanilla!)")
+    elif not args.mods:
+        print("Empty mod paths - use 'none' to launch without any mods (vanilla).")
         return 0
 
     global VERBOSE
@@ -455,7 +461,7 @@ def main():
     if os.name == "nt":
         run_arma(arma_path, params)
     else:
-        print("Warning: Launching Arma only implemented for Windows.")
+        print("Warning! Launching Arma only implemented for Windows.")
 
     return 0
 
