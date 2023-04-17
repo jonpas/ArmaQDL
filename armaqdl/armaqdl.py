@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import threading
 import time
 from pathlib import Path
@@ -12,8 +11,9 @@ from urllib.parse import quote
 if os.name == "nt":
     import winreg
 
-from ._version import version as __version__
-from . import config
+from ._version import __version__
+from .const import PACKAGE
+from . import config, update
 
 
 VERBOSE = False
@@ -60,7 +60,7 @@ def open_last_rpt():
         if not DRY:
             os.startfile(last_rpt)
     else:
-        print("Warning: Opening last log only implemented for Windows.")
+        print("Warning! Opening last log only implemented for Windows.")
 
 
 def build_mod(path, tool):
@@ -89,7 +89,7 @@ def build_mod(path, tool):
 
 
 def process_mods(mods, build_dev_tool):
-    if not mods:
+    if not mods or "none" in mods:
         return ""
 
     if VERBOSE:
@@ -107,7 +107,7 @@ def process_mods(mods, build_dev_tool):
         separators = cli_mod.count(":")
         if separators == 1:
             location, mod = cli_mod.split(":")
-        else:
+        elif separators > 1:
             location, mod, marks = cli_mod.split(":", 2)
             if isinstance(marks, str):
                 marks = [marks]
@@ -347,13 +347,16 @@ def main():
     # Generate new config
     config.generate()
 
+    # Cleanup update files
+    update.clean()
+
     # Parse arguments
     parser = argparse.ArgumentParser(
-        prog="armaqdl",
+        prog=PACKAGE,
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
@@ -377,6 +380,7 @@ def main():
     parser.add_argument("--list", action="store_true", help="list active config locations and build tools")
     parser.add_argument("--dry", action="store_true", help="dry run without actually launching anything (simulate)")
     parser.add_argument("--verbose", action="store_true", help="verbose output")
+    parser.add_argument("--update", action="store_true", help="self-update")
     parser.add_argument("-v", "--version", action="store_true", help="show version")
 
     args = parser.parse_args()
@@ -384,6 +388,11 @@ def main():
     if args.version:
         print(f"ArmaQDL v{__version__}")
         return 0
+
+    if args.update:
+        update.update()
+        return 0
+    update.check()
 
     global VERBOSE
     VERBOSE = args.verbose
@@ -399,7 +408,7 @@ def main():
         return 1
 
     if args.list:
-        epilog = f"ArmaQDL config location: {args.config}\n\n"
+        epilog = f"Config location: {args.config}\n\n"
         epilog += "Mod Locations:"
         for location in SETTINGS.get("locations", {}):
             epilog += f"\n  {location} => {SETTINGS['locations'][location]['path']}"
@@ -411,6 +420,12 @@ def main():
             epilog += f"\n  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}"
 
         print(epilog)
+        return 0
+
+    if "none" in args.mods:
+        print("Warning! Launching without any mods (vanilla!)")
+    elif not args.mods:
+        print("Empty mod paths - use 'none' to launch without any mods (vanilla).")
         return 0
 
     # Arma path
@@ -455,10 +470,6 @@ def main():
     if os.name == "nt":
         run_arma(arma_path, params)
     else:
-        print("Warning: Launching Arma only implemented for Windows.")
+        print("Warning! Launching Arma only implemented for Windows.")
 
     return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())

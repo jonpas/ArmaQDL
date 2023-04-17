@@ -22,18 +22,43 @@ jobs:
 
     - uses: actions/upload-artifact@v3
       with:
-        name: artifacts
+        name: build
+        path: dist/*
+        if-no-files-found: error
+
+  bundle:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install Hatch
+      run: pip install hatch
+
+    - name: Bundle
+      run: hatch run static:bundle
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: bundle
         path: dist/*
         if-no-files-found: error
 
   publish:
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [build, bundle]
 
     steps:
     - uses: actions/download-artifact@v3
       with:
-        name: artifacts
+        name: build
+        path: dist
+    - uses: actions/download-artifact@v3
+      with:
+        name: bundle
         path: dist
 
     - name: Install Hatch
@@ -44,3 +69,9 @@ jobs:
       env:
         HATCH_INDEX_USER: ${{ secrets.HATCH_INDEX_USER }}
         HATCH_INDEX_AUTH: ${{ secrets.HATCH_INDEX_AUTH }}
+
+    - name: Publish to GitHub
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/armaqdl.exe
+        draft: true

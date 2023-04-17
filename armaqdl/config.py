@@ -5,8 +5,7 @@ from pathlib import Path
 
 from platformdirs import PlatformDirs
 
-CONFIG_DIR = Path(PlatformDirs("ArmaQDL", False, roaming=True).user_config_dir)
-SETTINGS_FILE = "settings.toml"
+from .const import CONFIG_DIR, SETTINGS_FILE
 
 DIST_CONFIG_DIR = Path(__file__).parent / "config"
 if not DIST_CONFIG_DIR.exists():  # editable install fall-back location
