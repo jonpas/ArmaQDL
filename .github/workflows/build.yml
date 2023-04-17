@@ -26,7 +26,7 @@ jobs:
         path: dist/*
         if-no-files-found: error
 
-  bundle-windows:
+  bundle:
     runs-on: windows-latest
 
     steps:
