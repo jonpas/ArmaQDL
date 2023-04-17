@@ -86,29 +86,29 @@ _Note: All examples use `armaqdl` to launch ArmaQDL, replace it appropriately de
 
 **Example 1:**
 
-Launches Arma with CBA from P-drive, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds ACRE2 mod and opens the latest log file. Loads Arma directly into the editor using the specified mission from the "Soldier" profile.
+Launches Arma with CBA from main location, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds ACRE2 mod and opens the latest log file. Loads Arma directly into the editor using the specified mission from the "Soldier" profile.
 
 ```sh
-$ armaqdl p:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
+$ armaqdl main:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
 ```
 
 Specific build tool can also be specified, such as HEMTT:
 ```sh
-$ armaqdl p:x\cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
+$ armaqdl main:x\cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
 ```
 
 **Example 2:**
 
-Launches Arma Server with CBA from P-drive and loads specified mission from default profile's missions folder, copying it to the server in the process.
+Launches Arma Server with CBA from local development folder and loads specified mission from default profile's missions folder, copying it to the server in the process.
 
 ```sh
-$ armaqdl p:x\cba -m test.vr -s
+$ armaqdl dev:x\cba -m test.vr -s
 ```
 
-Launches Arma with CBA from P-drive and connects to the given server with the given password (`-j` defaults to the settings file).
+Launches Arma with CBA from local development folder and connects to the given server with the given password (`-j` defaults to the settings file).
 
 ```sh
-$ armaqdl p:x\cba -j 192.168.1.1:2302:test
+$ armaqdl dev:x\cba -j 192.168.1.1:2302:test
 ```
 
 
