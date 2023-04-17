@@ -74,7 +74,7 @@ def update():
         print(f"Error! Unable to retrieve latest version! => {e}")
         return 2
 
-    if is_newer(latest, __version__):
+    if not is_newer(latest, __version__):
         print("Latest version is already in use.")
         return 0
 
@@ -94,6 +94,7 @@ def update():
         request.urlretrieve(GITHUB.format(latest), exe)
     except (error.HTTPError, error.URLError) as e:
         print(f"Error! Unable to download update! => {e}")
+        os.replace(old_exe, exe)
         return 3
 
     print("Update downloaded!")
