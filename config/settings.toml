@@ -29,7 +29,7 @@ profile = "Dev"
   # Order defines priority if project supports multiple build tools
 
   [build.hemtt]
-    presence = "hemtt.toml"
+    presence = ".hemtt/project.toml"
     command = ["hemtt", "build"]
 
   [build.mikero]
