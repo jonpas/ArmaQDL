@@ -109,8 +109,7 @@ def process_mods(mods, build_dev_tool):
             location, mod = cli_mod.split(":")
         elif separators > 1:
             location, mod, marks = cli_mod.split(":", 2)
-            if isinstance(marks, str):
-                marks = [marks]
+            marks = marks.split(":")
             marks = [x.lower() for x in marks]
 
         if location not in SETTINGS.get("locations", {}).keys():
@@ -126,6 +125,7 @@ def process_mods(mods, build_dev_tool):
                 continue
 
         path = Path(location_path) / mod
+        path_build = path
 
         # Split wildcard (add to the end)
         if "*" in mod:
@@ -154,11 +154,33 @@ def process_mods(mods, build_dev_tool):
             ignores += 1
             continue
 
+        # Get just identifiers (first letters) of each mark
+        marks_identifiers = [x[0] for x in marks]
+
+        # HEMTT launch type argument
+        launch_type = ""  # Empty is path itself (non-HEMTT)
+        if (path / ".hemttout").exists():
+            launch_type = SETTINGS.get("locations", {}).get(location, {}).get("type", "dev")
+
+        if "t" in marks_identifiers:
+            launch_type_index = marks_identifiers.index("t")
+            launch_type = marks[launch_type_index][1:]
+
+            if launch_type not in ["", "dev", "build", "release"]:
+                print(f"Invalid launch type: {launch_type} (HEMTT)  [{location}:{mod}]")
+                continue
+
+        if launch_type:
+            path = path / ".hemttout" / launch_type
+
+            if not path.exists():
+                print(f"Invalid mod path: {path} (HEMTT)")
+                continue
+
         # Local build argument
         build_tool = ""
-        marks_build = [x[0] for x in marks]
-        if "b" in marks_build:
-            mark_build_index = marks_build.index("b")
+        if "b" in marks_identifiers:
+            mark_build_index = marks_identifiers.index("b")
             build_tool = marks[mark_build_index][1:]
 
             if not build_tool:
@@ -172,7 +194,7 @@ def process_mods(mods, build_dev_tool):
 
         # Build
         if build_tool:
-            if not build_mod(path, build_tool):
+            if not build_mod(path_build, build_tool):
                 continue
 
         paths.append(path)  # Marks success
@@ -362,7 +384,7 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
