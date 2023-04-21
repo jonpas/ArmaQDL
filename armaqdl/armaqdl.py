@@ -173,6 +173,9 @@ def process_mods(mods, build_dev_tool):
                 print(f"Invalid launch type: {launch_type} (HEMTT)  [{location}:{mod}]")
                 continue
 
+        if launch_type:
+            path = path / ".hemttout" / launch_type
+
         # Local build argument
         build_tool = ""
         if "b" in marks_identifiers:
@@ -193,12 +196,10 @@ def process_mods(mods, build_dev_tool):
             if not build_mod(path_build, build_tool, launch_type=launch_type):
                 continue
 
-        if launch_type:
-            path = path / ".hemttout" / launch_type
-
-            if not path.exists():
-                print(f"Invalid mod path: {path} (HEMTT)")
-                continue
+        # Check path existance after build, as HEMTT output does not exist if no build has been performed yet
+        if not path.exists():
+            print(f"Invalid mod path: {path}")
+            continue
 
         paths.append(path)  # Marks success
 
