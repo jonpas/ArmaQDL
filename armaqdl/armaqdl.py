@@ -63,10 +63,13 @@ def open_last_rpt():
         print("Warning! Opening last log only implemented for Windows.")
 
 
-def build_mod(path, tool):
+def build_mod(path, tool, launch_type=""):
     for build_tool in SETTINGS.get("build", {}):
         req_file = SETTINGS["build"][build_tool]["presence"]
         cmd = SETTINGS["build"][build_tool]["command"]
+
+        if launch_type and cmd[0] == "hemtt":
+            cmd[1] = launch_type
 
         if (tool == "b" or tool.lower() == build_tool.lower()) and (path / req_file).exists():
             print(f"=> Building [{build_tool}] ...")
@@ -170,13 +173,6 @@ def process_mods(mods, build_dev_tool):
                 print(f"Invalid launch type: {launch_type} (HEMTT)  [{location}:{mod}]")
                 continue
 
-        if launch_type:
-            path = path / ".hemttout" / launch_type
-
-            if not path.exists():
-                print(f"Invalid mod path: {path} (HEMTT)")
-                continue
-
         # Local build argument
         build_tool = ""
         if "b" in marks_identifiers:
@@ -194,7 +190,14 @@ def process_mods(mods, build_dev_tool):
 
         # Build
         if build_tool:
-            if not build_mod(path_build, build_tool):
+            if not build_mod(path_build, build_tool, launch_type=launch_type):
+                continue
+
+        if launch_type:
+            path = path / ".hemttout" / launch_type
+
+            if not path.exists():
+                print(f"Invalid mod path: {path} (HEMTT)")
                 continue
 
         paths.append(path)  # Marks success

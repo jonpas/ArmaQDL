@@ -154,6 +154,12 @@ Launches Arma with mods from local development folder, CBA using HEMTT release b
 $ armaqdl dev:cba:trelease dev:ace dev:acre2:t
 ```
 
+Build type for HEMTT can also be specified using the same flag in addition to build flag.
+
+```sh
+$ armaqdl dev:cba:bhemtt:trelease dev:ace:b:tbuild
+```
+
 
 ## Development
 
