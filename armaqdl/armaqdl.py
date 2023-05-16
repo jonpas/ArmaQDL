@@ -53,9 +53,10 @@ def find_arma_exe(executable):
     else:
         # Relative to the Arma 3 directory
         path = find_arma()
+        if not path:
+            return None
 
-        if path:
-            path /= f"{executable}.exe"
+        path /= f"{executable}.exe"
 
     if not path.exists():
         return None
