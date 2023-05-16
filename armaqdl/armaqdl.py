@@ -21,7 +21,7 @@ DRY = False
 SETTINGS = None
 
 
-def find_arma(executable=True):
+def find_arma():
     path = None
 
     if os.name == "nt":
@@ -35,14 +35,30 @@ def find_arma(executable=True):
 
         path = Path(path)
 
-        if executable:
-            path = path / "arma3_x64.exe"
-
         if not path.exists():
             return None
     else:
         # Linux support does not exist, this is just for testing
         path = Path()
+
+    return path
+
+
+def find_arma_exe(executable):
+    executable = executable.replace("\\", "/").replace("//", "/")  # Support single backwards slashes on Windows
+
+    if "/" in executable:
+        # Absolute
+        path = Path(executable)
+    else:
+        # Relative to the Arma 3 directory
+        path = find_arma()
+
+        if path.exists():
+            path /= f"{executable}.exe"
+
+    if not path.exists():
+        return None
 
     return path
 
@@ -257,7 +273,7 @@ def process_mission_server(mission):
     if not mission:
         return ""
 
-    arma_path = find_arma(executable=False)
+    arma_path = find_arma()
     if not arma_path:
         return ""
 
@@ -369,7 +385,7 @@ def run_arma(arma_path, params):
     if VERBOSE:
         print(f"Process command: {process_cmd}")
 
-    print("Running ...")
+    print(f"Running {arma_path.stem} ...")
     if not DRY:
         # Don't wait for process to finish (Popen() instead of run())
         subprocess.Popen(process_cmd)
@@ -404,6 +420,8 @@ def main():
     parser.add_argument("-f", "--fullscreen", action="store_true")
     parser.add_argument("-par", "--parameters", nargs="+", type=str,
                         help="other parameters to pass directly (use with '=' to pass '-<arg>')")
+    parser.add_argument("-e", "--executable", default="arma3_x64", type=str,
+                        help="Arma executable to launch (relative to Arma directory without .exe or absolute with .exe)")
 
     parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="b", type=str,
                         help="build mods (auto-determine tool if unspecified)")
@@ -462,7 +480,7 @@ def main():
         return 0
 
     # Arma path
-    arma_path = find_arma(executable=True)
+    arma_path = find_arma_exe(executable=args.executable)
     if not arma_path:
         print("Error! Invalid Arma path.")
         return 2
