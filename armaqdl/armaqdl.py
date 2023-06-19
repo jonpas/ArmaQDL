@@ -21,7 +21,7 @@ DRY = False
 SETTINGS = None
 
 
-def find_arma(executable=True):
+def find_arma():
     path = None
 
     if os.name == "nt":
@@ -35,14 +35,31 @@ def find_arma(executable=True):
 
         path = Path(path)
 
-        if executable:
-            path = path / "arma3_x64.exe"
-
         if not path.exists():
             return None
     else:
         # Linux support does not exist, this is just for testing
         path = Path()
+
+    return path
+
+
+def find_arma_exe(executable):
+    executable = executable.replace("\\", "/").replace("//", "/")  # Support single backwards slashes on Windows
+
+    if "/" in executable:
+        # Absolute
+        path = Path(executable)
+    else:
+        # Relative to the Arma 3 directory
+        path = find_arma()
+        if not path:
+            return None
+
+        path /= f"{executable}.exe"
+
+    if not path.exists():
+        return None
 
     return path
 
@@ -63,10 +80,13 @@ def open_last_rpt():
         print("Warning! Opening last log only implemented for Windows.")
 
 
-def build_mod(path, tool):
+def build_mod(path, tool, launch_type=""):
     for build_tool in SETTINGS.get("build", {}):
         req_file = SETTINGS["build"][build_tool]["presence"]
         cmd = SETTINGS["build"][build_tool]["command"]
+
+        if launch_type and cmd[0] == "hemtt":
+            cmd[1] = launch_type
 
         if (tool == "b" or tool.lower() == build_tool.lower()) and (path / req_file).exists():
             print(f"=> Building [{build_tool}] ...")
@@ -109,8 +129,7 @@ def process_mods(mods, build_dev_tool):
             location, mod = cli_mod.split(":")
         elif separators > 1:
             location, mod, marks = cli_mod.split(":", 2)
-            if isinstance(marks, str):
-                marks = [marks]
+            marks = marks.split(":")
             marks = [x.lower() for x in marks]
 
         if location not in SETTINGS.get("locations", {}).keys():
@@ -126,6 +145,7 @@ def process_mods(mods, build_dev_tool):
                 continue
 
         path = Path(location_path) / mod
+        path_build = path
 
         # Split wildcard (add to the end)
         if "*" in mod:
@@ -154,11 +174,29 @@ def process_mods(mods, build_dev_tool):
             ignores += 1
             continue
 
+        # Get just identifiers (first letters) of each mark
+        marks_identifiers = [x[0] for x in marks]
+
+        # HEMTT launch type argument
+        launch_type = ""  # Empty is path itself (non-HEMTT)
+        if (path / ".hemttout").exists():
+            launch_type = SETTINGS.get("locations", {}).get(location, {}).get("type", "dev")
+
+        if "t" in marks_identifiers:
+            launch_type_index = marks_identifiers.index("t")
+            launch_type = marks[launch_type_index][1:]
+
+            if launch_type not in ["", "dev", "build", "release"]:
+                print(f"Invalid launch type: {launch_type} (HEMTT)  [{location}:{mod}]")
+                continue
+
+        if launch_type:
+            path = path / ".hemttout" / launch_type
+
         # Local build argument
         build_tool = ""
-        marks_build = [x[0] for x in marks]
-        if "b" in marks_build:
-            mark_build_index = marks_build.index("b")
+        if "b" in marks_identifiers:
+            mark_build_index = marks_identifiers.index("b")
             build_tool = marks[mark_build_index][1:]
 
             if not build_tool:
@@ -172,8 +210,13 @@ def process_mods(mods, build_dev_tool):
 
         # Build
         if build_tool:
-            if not build_mod(path, build_tool):
+            if not build_mod(path_build, build_tool, launch_type=launch_type):
                 continue
+
+        # Check path existance after build, as HEMTT output does not exist if no build has been performed yet
+        if not path.exists():
+            print(f"Invalid mod path: {path}")
+            continue
 
         paths.append(path)  # Marks success
 
@@ -231,7 +274,7 @@ def process_mission_server(mission):
     if not mission:
         return ""
 
-    arma_path = find_arma(executable=False)
+    arma_path = find_arma()
     if not arma_path:
         return ""
 
@@ -264,7 +307,7 @@ def process_mission_server(mission):
 
 
 def process_flags(args):
-    flags = ["-nosplash", "-hugepages"]
+    flags = ["-skipIntro", "-noSplash", "-hugePages"]
 
     profile = args.profile
     if args.headless:
@@ -283,6 +326,9 @@ def process_flags(args):
 
     if not args.no_errors:
         flags.append("-showScriptErrors")
+
+    if not args.no_debug:
+        flags.append("-debug")
 
     if args.no_pause:
         flags.append("-noPause")
@@ -325,6 +371,9 @@ def process_flags_server(args):
     if not args.no_filepatching:
         flags.append("-filePatching")
 
+    if not args.no_debug:
+        flags.append("-debug")
+
     if args.check_signatures:
         flags.append("-checkSignatures")
 
@@ -337,7 +386,7 @@ def run_arma(arma_path, params):
     if VERBOSE:
         print(f"Process command: {process_cmd}")
 
-    print("Running ...")
+    print(f"Running {arma_path.stem} ...")
     if not DRY:
         # Don't wait for process to finish (Popen() instead of run())
         subprocess.Popen(process_cmd)
@@ -356,7 +405,7 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
@@ -366,11 +415,14 @@ def main():
     parser.add_argument("-p", "--profile", default="", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
     parser.add_argument("-ne", "--no-errors", action="store_true", help="hide script errors")
+    parser.add_argument("-nd", "--no-debug", action="store_true", help="disable debug mode")
     parser.add_argument("-np", "--no-pause", action="store_true", help="don't pause on focus loss")
     parser.add_argument("-c", "--check-signatures", action="store_true", help="check signatures")
     parser.add_argument("-f", "--fullscreen", action="store_true")
     parser.add_argument("-par", "--parameters", nargs="+", type=str,
                         help="other parameters to pass directly (use with '=' to pass '-<arg>')")
+    parser.add_argument("-e", "--executable", default="arma3_x64", type=str,
+                        help="Arma executable to launch (relative to Arma directory without .exe or absolute with .exe)")
 
     parser.add_argument("-b", "--build", metavar="TOOL", nargs="?", const="b", type=str,
                         help="build mods (auto-determine tool if unspecified)")
@@ -429,7 +481,7 @@ def main():
         return 0
 
     # Arma path
-    arma_path = find_arma(executable=True)
+    arma_path = find_arma_exe(executable=args.executable)
     if not arma_path:
         print("Error! Invalid Arma path.")
         return 2

@@ -5,7 +5,9 @@ profile = "Dev"
 # Alternatively use full absolute paths to `@mod` folders with the CLI
 [locations]
   # Every location contains a path and a build flag determining if mods from that folder should be rebuild with the `-b` CLI flag
-  # Use forward slahes `/` in paths
+  # Every location may contain a type ("dev" [default], "build" or "release") determining the HEMTT build to load by default
+  #   HEMTT builds will automatically load if `.hemttout` folder is present and non-HEMTT build is not forced
+  # Use forward slashes `/` in paths
 
   [locations.main]
     path = "C:/Program Files (x86)/Steam/steamapps/common/Arma 3"
@@ -22,6 +24,7 @@ profile = "Dev"
   [locations.p]
     path = "P:/"
     build = true
+    type = "build"  # Load HEMTT build from `.hemttout/build/` by default instead, if available, otherwise from `addons/`
 
 # Build tools and their instructions
 [build]
@@ -29,8 +32,8 @@ profile = "Dev"
   # Order defines priority if project supports multiple build tools
 
   [build.hemtt]
-    presence = "hemtt.toml"
-    command = ["hemtt", "build"]
+    presence = ".hemtt/project.toml"
+    command = ["hemtt", "dev"]
 
   [build.mikero]
     presence = "tools/build.py"

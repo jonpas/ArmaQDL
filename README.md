@@ -64,6 +64,7 @@ $ armaqdl
 $ python -m armaqdl
 ```
 
+
 ## Setup
 
 You should modify the [default settings](https://github.com/jonpas/ArmaQDL/blob/master/config/settings.toml) to your needs. Launching without setup may create a new profile and result in failed launches.
@@ -73,6 +74,30 @@ Settings file can be found in your operating system's standard configuration dir
 - Linux: `~/.config/ArmaQDL/settings.toml`
 
 Settings are in [TOML](https://toml.io/en/) format and can be edited with any text editor.
+
+### Dedicated Server
+
+Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following entries mission and Headless Client entries.
+
+```cpp
+// Automatically load the first mission in rotation
+class Missions {
+    class Test {
+        template = "mission.vr";
+    };
+};
+
+// Allow Headless Clients from local machine
+headlessClients[] = {"127.0.0.1"};
+localClient[] = {"127.0.0.1"};
+
+// Allow multiple connections, unsigned mods and file patching (as needed)
+kickDuplicate = 0;
+verifySignatures = 0;
+allowedFilePatching = 2;
+```
+
+ArmaQDL copies the mission from used profile's missions folder and updates the mission name in `server.cfg` to make the server automatically load it.
 
 
 ## Usage
@@ -84,31 +109,55 @@ $ armaqdl -h
 ```
 _Note: All examples use `armaqdl` to launch ArmaQDL, replace it appropriately depending on your install._
 
-**Example 1:**
+**Example 1:** _(launching and building mods)_
 
-Launches Arma with CBA from P-drive, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds ACRE2 mod and opens the latest log file. Loads Arma directly into the editor using the specified mission from the "Soldier" profile.
+Launches Arma with CBA from main location, ACE3 from Workshop install and ACRE2 from local development folder. Additionally builds ACRE2 mod and opens the latest log file. Loads Arma directly into the editor using the specified mission from the "Soldier" profile.
 
 ```sh
-$ armaqdl p:x\cba workshop:@ace dev:acre2:b -m Soldier:test.vr
+$ armaqdl main:cba workshop:@ace dev:acre2:b -m Soldier:test.vr
 ```
 
-Specific build tool can also be specified, such as HEMTT:
+Specific build tool can also be specified, such as HEMTT.
+
 ```sh
-$ armaqdl p:x\cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
+$ armaqdl main:cba workshop:@ace dev:acre2:bhemtt -m Soldier:test.vr
 ```
 
-**Example 2:**
+**Example 2:** _(server and mission handling)_
 
-Launches Arma Server with CBA from P-drive and loads specified mission from default profile's missions folder, copying it to the server in the process.
+Launches Arma Server with CBA from local development folder and loads specified mission from default profile's missions folder, copying it to the server in the process.
 
 ```sh
-$ armaqdl p:x\cba -m test.vr -s
+$ armaqdl dev:cba -m test.vr -s
 ```
 
-Launches Arma with CBA from P-drive and connects to the given server with the given password (`-j` defaults to the settings file).
+Launches Arma with CBA from local development folder and connects to the given server with the given password (`-j` defaults to the settings file).
 
 ```sh
-$ armaqdl p:x\cba -j 192.168.1.1:2302:test
+$ armaqdl dev:cba -j 192.168.1.1:2302:test
+```
+
+**Example 3:** _(glob and skipping)_
+
+Launches Arma with all mods in a folder `modpack` from main location, skipping ACE3 in the same folder and instead loading ACE3 from a local development folder. This is useful for replacing a subset of mods from a bigger modpack.
+
+```sh
+$ armaqdl main:modpack\* main:modpack\ace:s dev:ace
+```
+
+**Example 4:** _(launch types)_
+
+Launches Arma with mods from local development folder, CBA using HEMTT release build, ACE3 using automatic launch type determination and ACRE2 using non-HEMTT build. Available launch types are `dev`, `build`, `release` for HEMTT or none for non-HEMTT `addons/`. Automatic determination uses HEMTT if `.hemttout` folder exists with launch type as specified in settings file, or `dev` if not specified.
+
+
+```sh
+$ armaqdl dev:cba:trelease dev:ace dev:acre2:t
+```
+
+Build type for HEMTT can also be specified using the same flag in addition to build flag.
+
+```sh
+$ armaqdl dev:cba:bhemtt:trelease dev:ace:b:tbuild
 ```
 
 
