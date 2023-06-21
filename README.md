@@ -77,7 +77,7 @@ Settings are in [TOML](https://toml.io/en/) format and can be edited with any te
 
 ### Dedicated Server
 
-Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following entries mission and Headless Client entries.
+Loading a mission on dedicated server automatically requires `server.cfg` to be present next to `arma3_x64.exe` with at least the following mission and Headless Client entries.
 
 ```cpp
 // Automatically load the first mission in rotation
