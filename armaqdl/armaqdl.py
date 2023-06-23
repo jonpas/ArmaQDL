@@ -116,7 +116,7 @@ def process_mods(mods, build_dev_tool):
         print(f"Process mods: {mods}")
 
     paths, skips = [], []
-    ignores = 0
+    ignores, opts = 0, 0
 
     for i, mod in enumerate(mods):
         location = "abs"  # Default if not specified
@@ -164,7 +164,7 @@ def process_mods(mods, build_dev_tool):
         # Skip mark (add to skip list)
         if "s" in marks or "skip" in marks:
             if VERBOSE:
-                print(f"{cli_mod}  [{path}]\n=> Skip in wildcards")
+                print(f"{location}:{mod}  [{path}]\n=> Skip in wildcards")
 
             skips.append(path)
             ignores += 1
@@ -172,7 +172,7 @@ def process_mods(mods, build_dev_tool):
 
         # Skip mod found in wildcard
         if path in skips:
-            print(f"(skip) {cli_mod}  [{path}]")
+            print(f"(skip) {location}:{mod}  [{path}]")
             ignores += 1
             continue
 
@@ -208,7 +208,7 @@ def process_mods(mods, build_dev_tool):
         if not build_tool and build_dev_tool is not None and (location == "abs" or SETTINGS["locations"][location].get("build", False)):
             build_tool = build_dev_tool
 
-        print(f"{cli_mod}  [{path}]")
+        print(f"{location}:{mod}  [{path}]")
 
         # Build
         if build_tool:
@@ -222,11 +222,33 @@ def process_mods(mods, build_dev_tool):
 
         paths.append(path)  # Marks success
 
+        # Optionals
+        if "o" in marks_identifiers:
+            optionals_index = marks_identifiers.index("o")
+            optionals = marks[optionals_index][2:]
+
+            optionals = optionals.split("@")
+            opts += len(optionals)
+
+            for optional in optionals:
+                optional_path = path / "optionals"
+                optional_paths = list(optional_path.glob(f"@*{optional}"))
+                if len(optional_paths) == 1:
+                    optional_path = optional_paths[0]
+                else:
+                    print(f"  Invalid optional: {optional} (no match or too many matches)")
+                    if VERBOSE:
+                        print(f"    Possible matches: {[o.name for o in optional_paths]}")
+                    continue
+
+                print(f"  {optional_path.name}  [{optional_path.relative_to(path)}]")
+                paths.append(optional_path)
+
     # Some mods are invalid (return at the end to show all invalid locations/paths)
     if VERBOSE:
-        print(f"Paths: {len(paths)} processed vs. {len(mods) - ignores} input ({len(mods)} mods - {ignores} ignores)")
+        print(f"Paths: {len(paths)} processed vs. {len(mods) + opts - ignores} input ({len(mods) + opts} mods - {ignores} ignores)")
 
-    if len(paths) != len(mods) - ignores:
+    if len(paths) != len(mods) + opts - ignores:
         return None
 
     print(f"Total mods: {len(paths)}\n")
@@ -404,7 +426,7 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]][:o[opts]] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
