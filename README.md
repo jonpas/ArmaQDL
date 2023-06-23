@@ -1,9 +1,10 @@
 # ArmaQDL
 
-[![CI - Test](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml)
-[![CI - Build](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml)
-[![PyPI - Version](https://img.shields.io/pypi/v/ArmaQDL.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ArmaQDL)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/ArmaQDL.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ArmaQDL)
+[![CI Test](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/test.yml)
+[![CI Build](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml/badge.svg)](https://github.com/jonpas/ArmaQDL/actions/workflows/build.yml)
+[![PyPI](https://img.shields.io/pypi/v/ArmaQDL.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ArmaQDL)
+[![PyPI Python](https://img.shields.io/pypi/pyversions/ArmaQDL.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ArmaQDL)
+[![WinGet](https://img.shields.io/badge/WinGet-Run-lightblue.svg)](https://winget.run/pkg/jonpas/ArmaQDL)
 
 Quick launching various mod development configurations for Arma through a simple CLI.
 
@@ -26,25 +27,24 @@ Through easily-identifiable preset locations, this program can provide a fast an
 ## Installation
 
 ArmaQDL is distributed on [PyPI](https://pypi.org/) as well as a Standalone executable (Windows only).
-- Use Standalone if you are on Windows and don't have Python installed.
-- Use PyPI if you have Python installed or are not using Windows.
+- Use [WinGet (recommended)](#winget-(recommended)) or [Standalone](#standalone) if you are on Windows and don't have Python installed.
+- Use [PyPI](#pypi) if you have Python installed or are not using Windows.
 
 PyPI provides easier updating of ArmaQDL, while Standalone requires manual updates.
+
+#### WinGet (recommended)
+
+Open Command Prompt, PowerShell or any other terminal application and install ArmaQDL.
+
+```sh
+$ winget install armaqdl
+```
 
 #### Standalone
 
 Download `armaqdl.exe` from [latest release](https://github.com/jonpas/ArmaQDL/releases/latest) and place it in a convenient location.
 
-Open Command Prompt, PowerShell or any other terminal application, navigate to the location of `armaqdl.exe` and run it once to generate configuration files without launching Arma.
-
-```sh
-# Command Prompt
-$ armaqdl
-# PowerShell
-$ .\armaqdl
-```
-_Note: Add `.exe` if `armaqdl` is not enough to find the executable._
-
+_Note: Add location directory to `PATH` environmental variable to use it directly._
 
 #### PyPI
 
@@ -55,17 +55,19 @@ $ pip install --user ArmaQDL
 ```
 _Note: Add pip installation directory to `PATH` environmental variable to use it directly._
 
-Run it once to generate configuration files without launching Arma.
-
-```sh
-# Directly (only works if in PATH)
-$ armaqdl
-# As a Python module
-$ python -m armaqdl
-```
-
 
 ## Setup
+
+Open Command Prompt, PowerShell or any other terminal application, and run ArmaQDL once to generate the configuration files (this will not launch Arma).
+
+```sh
+# WinGet / CMD / PyPI if in PATH
+$ armaqdl
+
+# PyPI as a Python module
+$ python -m armaqdl
+```
+_Note: Add `.exe` if `armaqdl` is not enough to find the executable._
 
 You should modify the [default settings](https://github.com/jonpas/ArmaQDL/blob/master/config/settings.toml) to your needs. Launching without setup may create a new profile and result in failed launches.
 
