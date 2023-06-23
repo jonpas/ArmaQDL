@@ -7,17 +7,41 @@ from pathlib import Path
 from urllib import request, error
 
 from ._version import __version_tuple__
-from .const import PACKAGE, CONFIG_DIR, LATEST_FILE
+from .const import PACKAGE, CONFIG_DIR, LATEST_FILE, WINGET_PATH
 
 GITHUB = f"https://github.com/jonpas/{PACKAGE}" + "/releases/download/v{}/armaqdl.exe"
 PYPI = f"https://pypi.org/pypi/{PACKAGE}/json"
+
+
+def get_dist():
+    if is_exe():
+        exe = get_exe()
+        if exe == WINGET_PATH / exe.name:
+            return "winget"
+        return "standalone"
+    return "python"
+
+
+def get_update_info(manager):
+    if manager == "python":
+        return "Update with your Python package manager."
+    if manager == "standalone":
+        return "Run with '--update' to perform a self-update."
+    elif manager == "winget":
+        return "Update with 'winget upgrade armaqdl'."
+    return ""
 
 
 def is_exe():
     return getattr(sys, "frozen", False)
 
 
-def get_exe_old(exe):
+def get_exe():
+    return Path(sys.executable).resolve(strict=True)
+
+
+def get_exe_old():
+    exe = get_exe()
     return exe.parent / f"{exe.stem}_old{exe.suffix}"
 
 
@@ -56,7 +80,7 @@ def is_newer(latest):
 
 def clean():
     if is_exe():
-        old_exe = get_exe_old(Path(sys.executable))
+        old_exe = get_exe_old()
         if old_exe.exists():
             os.remove(old_exe)
 
@@ -81,17 +105,15 @@ def check():
             latest = f.read()
 
     if is_newer(latest):
-        if is_exe():
-            print(f"Note: Update v{latest} is available! Run with '--update' to perform a self-update.\n")
-        else:
-            print(f"Note: Update v{latest} is available!\n")
+        print(f"Note: Update v{latest} is available! {get_update_info(get_dist())}\n")
 
     return 0
 
 
 def update():
-    if not is_exe():
-        print("Error! Only standalone executable may be updated!")
+    dist = get_dist()
+    if dist != "standalone":
+        print(f"Error! Only standalone executable may be self-updated! {get_update_info(dist)}")
         return 1
 
     try:
@@ -109,11 +131,11 @@ def update():
         print("Administrator permissions required - agree if you would like to continue.")
         ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv[1:]), None, 1)
 
-    exe = Path(sys.executable)
+    exe = get_exe()
     print(f"Location: {exe}")
 
     # Rename current executable
-    old_exe = get_exe_old(exe)
+    old_exe = get_exe_old()
     os.replace(exe, old_exe)
 
     try:

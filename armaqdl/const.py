@@ -7,3 +7,5 @@ PACKAGE = __name__.split(".")[0]
 CONFIG_DIR = Path(PlatformDirs("ArmaQDL", False, roaming=True).user_config_dir)
 SETTINGS_FILE = "settings.toml"
 LATEST_FILE = "latest"
+
+WINGET_PATH = Path(PlatformDirs("WinGet", "Microsoft").user_config_dir) / "Links"
