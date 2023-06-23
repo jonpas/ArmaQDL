@@ -160,6 +160,22 @@ Build type for HEMTT can also be specified using the same flag in addition to bu
 $ armaqdl dev:cba:bhemtt:trelease dev:ace:b:tbuild
 ```
 
+**Example 5:** _(optionals)_
+
+_Note: Only optionals inside `optionals` folder in a full `@mod` folder structure (such as HEMTT produces) are supported._
+
+Launches Arma with Theseus Services from local development folder and its MELB Variants optional skipping the prefix using glob pattern matching. `@` must still be used for each optional (or pattern) specified.
+
+```sh
+$ armaqdl dev:TheseusServices:o@*variants_melb
+```
+
+Glob pattern matching may also be used to match multiple optionals.
+
+```sh
+$ armaqdl dev:TheseusServices:o@*variants*
+```
+
 
 ## Development
 

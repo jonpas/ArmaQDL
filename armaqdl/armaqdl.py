@@ -226,23 +226,32 @@ def process_mods(mods, build_dev_tool):
         if "o" in marks_identifiers:
             optionals_index = marks_identifiers.index("o")
             optionals = marks[optionals_index][2:]
-
             optionals = optionals.split("@")
-            opts += len(optionals)
+
+            if VERBOSE:
+                print(f"  Process optionals: {optionals}")
 
             for optional in optionals:
-                optional_path = path / "optionals"
-                optional_paths = list(optional_path.glob(f"@*{optional}"))
-                if len(optional_paths) == 1:
-                    optional_path = optional_paths[0]
-                else:
-                    print(f"  Invalid optional: {optional} (no match or too many matches)")
-                    if VERBOSE:
-                        print(f"    Possible matches: {[o.name for o in optional_paths]}")
+                optionals_path = path / "optionals"
+                optional = f"@{optional}"
+
+                if "*" in optional:
+                    optionals_wildcard = [f"{optional_wildcard.name[1:]}"
+                                          for optional_wildcard in optionals_path.glob(optional) if optional_wildcard.is_dir()]
+                    optionals.extend(optionals_wildcard)
+                    ignores += 1
+                    continue
+
+                optional_path = optionals_path / optional
+
+                if not optional_path.exists():
+                    print(f"  Invalid optional path: {optional_path.relative_to(path)}")
                     continue
 
                 print(f"  {optional_path.name}  [{optional_path.relative_to(path)}]")
                 paths.append(optional_path)
+
+            opts += len(optionals)
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
     if VERBOSE:
