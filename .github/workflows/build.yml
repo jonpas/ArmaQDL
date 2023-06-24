@@ -61,8 +61,8 @@ jobs:
         name: build
         path: dist
 
-    #- name: Publish package distributions to PyPI
-    #  uses: pypa/gh-action-pypi-publish@release/v1
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
 
   publish-github:
     runs-on: ubuntu-latest
@@ -79,16 +79,3 @@ jobs:
       with:
         files: dist/armaqdl.exe
         draft: true
-
-  publish-windows:
-    runs-on: windows-latest
-    needs: [publish-github]
-
-    steps:
-      # Requires forked winget-pkgs: https://github.com/microsoft/winget-pkgs to the same account as this project
-      - uses: vedantmgoyal2009/winget-releaser@v2
-        with:
-          identifier: jonpas.ArmaQDL
-          installers-regex: 'armaqdl.exe'
-          max-versions-to-keep: 5
-          token: ${{ secrets.WINGET_TOKEN }} # Classic Personal Access Token with [public_repo, workflow] scopes
