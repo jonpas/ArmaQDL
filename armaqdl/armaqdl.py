@@ -440,7 +440,7 @@ def main():
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
     parser.add_argument("-j", "--join-server", nargs="?", const="", type=str, help="join server")
-    parser.add_argument("-hc", "--headless", action="store_true", help="start headess client")
+    parser.add_argument("-hc", "--headless", action="store_true", help="start headless client")
 
     parser.add_argument("-p", "--profile", default="", type=str, help="profile name")
     parser.add_argument("-nfp", "--no-filepatching", action="store_true", help="disable file patching")
