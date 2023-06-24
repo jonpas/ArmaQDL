@@ -7,6 +7,7 @@ on:
 jobs:
   publish-winget:
     runs-on: windows-latest
+    environment: winget
 
     steps:
       # Requires forked winget-pkgs: https://github.com/microsoft/winget-pkgs to the same account as this project
