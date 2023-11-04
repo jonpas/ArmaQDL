@@ -1,8 +1,7 @@
 import os
 import shutil
+import tomllib
 from pathlib import Path
-
-import toml
 
 from .const import CONFIG_DIR, SETTINGS_FILE
 
@@ -22,12 +21,10 @@ def generate():
 
 def load(folder):
     try:
-        settings = toml.load(folder / SETTINGS_FILE)
-    except TypeError as e:
-        print(f"Error! Invalid settings file!\n{e}")
-        return None
-    except toml.TomlDecodeError as e:
-        print(f"Error! Invalid settings format!\n{e}")
+        with open(folder / SETTINGS_FILE, "rb") as f:
+            settings = tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        print(f"Error! Invalid settings file or format!\n{e}")
         return None
 
     return settings
