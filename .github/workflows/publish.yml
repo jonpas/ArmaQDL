@@ -11,7 +11,7 @@ jobs:
 
     steps:
       # Requires forked winget-pkgs: https://github.com/microsoft/winget-pkgs to the same account as this project
-      - uses: vedantmgoyal2009/winget-releaser@v2
+      - uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: jonpas.ArmaQDL
           installers-regex: 'armaqdl.exe'
