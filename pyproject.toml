@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling>=1.11", "hatch-vcs"]
+requires = ["hatchling>=1.25", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
@@ -10,15 +10,15 @@ authors = [
 description = "Python program for quick launching various mod development configurations for Arma through a simple CLI."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "License :: OSI Approved :: MIT License",
   "Operating System :: Microsoft :: Windows",
   "Topic :: Software Development :: Build Tools",
