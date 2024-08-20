@@ -46,6 +46,10 @@ profile = "Dev"
 [log]
   open_delay = 3
 
+  # Custom command to open the log file with (avilable replacement patterns: $PATH, $FILE)
+  # Example: Open in Windows Terminal PowerShell, set the tab title and tail the given RPT
+  # command = ["wt", "--title", "$FILE", "pwsh", "-NoProfile", "-Command", "Get-Content -Wait -Tail 100 '$PATH'"]
+
 # Default server information to use with ArmaQDL
 [server]
   profile = "Server"

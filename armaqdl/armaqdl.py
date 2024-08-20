@@ -74,7 +74,14 @@ def open_last_rpt():
         rpt_path = Path.home() / "AppData" / "Local" / "Arma 3"
         rpt_list = rpt_path.glob("*.rpt")
         last_rpt = max(rpt_list, key=os.path.getctime)
-        if not DRY:
+
+        log_command = SETTINGS.get('log', {}).get('command', '')
+        if log_command:
+            log_command = [cmd.replace("$PATH", str(last_rpt.resolve())) for cmd in log_command]
+            log_command = [cmd.replace("$FILE", last_rpt.name) for cmd in log_command]
+            if not DRY:
+                subprocess.run(log_command, cwd=rpt_path, shell=True)
+        elif not DRY:
             os.startfile(last_rpt)
     else:
         print("Warning! Opening last log only implemented for Windows.")
