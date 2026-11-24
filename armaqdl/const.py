@@ -9,3 +9,4 @@ SETTINGS_FILE = "settings.toml"
 LATEST_FILE = "latest"
 
 WINGET_PATH = Path(PlatformDirs("WinGet", "Microsoft").user_config_dir) / "Links"
+SCOOP_APP = "armaqdl"

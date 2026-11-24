@@ -1,0 +1,15 @@
+{
+    "version": "1.0.0",
+    "description": "Quick launching various mod development configurations for Arma through a simple CLI.",
+    "homepage": "https://github.com/jonpas/ArmaQDL",
+    "license": "MIT",
+    "url": "https://github.com/jonpas/ArmaQDL/releases/download/v1.0.0/armaqdl.exe",
+    "hash": "bdecce6689f9586ebd79a4c1f06a65bc4a6e9c6f21cf1c196c74dfcd52c25b0e",
+    "bin": "armaqdl.exe",
+    "checkver": {
+        "github": "https://github.com/jonpas/ArmaQDL"
+    },
+    "autoupdate": {
+        "url": "https://github.com/jonpas/ArmaQDL/releases/download/v$version/armaqdl.exe"
+    }
+}

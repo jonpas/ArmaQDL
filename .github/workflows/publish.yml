@@ -3,9 +3,16 @@ name: Publish
 on:
   release:
     types: [released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish to Scoop bucket (eg. v1.0.0)
+        required: true
+        type: string
 
 jobs:
   publish-winget:
+    if: github.event_name == 'release'
     runs-on: windows-latest
     environment: winget
 
@@ -17,3 +24,37 @@ jobs:
           installers-regex: 'armaqdl.exe'
           max-versions-to-keep: 5
           token: ${{ secrets.WINGET_TOKEN }} # Classic Personal Access Token with [public_repo, workflow] scopes
+
+  publish-scoop:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Push updated manifest to default branch
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+    steps:
+      # Bucket manifest lives on the default branch (repository is its own Scoop bucket)
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Update manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$TAG" --pattern armaqdl.exe --dir "$RUNNER_TEMP"
+          HASH="$(sha256sum "$RUNNER_TEMP/armaqdl.exe" | cut -d ' ' -f 1)"
+          python3 tools/scoop_manifest.py bucket/armaqdl.json "${TAG#v}" "$HASH"
+          cat bucket/armaqdl.json
+
+      - name: Commit manifest
+        run: |
+          if git diff --quiet -- bucket/armaqdl.json; then
+            echo "Manifest already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bucket/armaqdl.json
+          git commit -m "Scoop - Update ArmaQDL to $TAG"
+          git push

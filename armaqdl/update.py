@@ -7,10 +7,24 @@ from pathlib import Path
 from urllib import request, error
 
 from ._version import __version_tuple__
-from .const import PACKAGE, CONFIG_DIR, LATEST_FILE, WINGET_PATH
+from .const import PACKAGE, CONFIG_DIR, LATEST_FILE, WINGET_PATH, SCOOP_APP
 
 GITHUB = f"https://github.com/jonpas/{PACKAGE}" + "/releases/download/v{}/armaqdl.exe"
 PYPI = f"https://pypi.org/pypi/{PACKAGE}/json"
+
+
+def is_scoop(exe):
+    # Scoop installs to <root>/apps/<app>/<version>/ (with 'current' junction), <root> also holds 'shims'
+    roots = [os.environ.get("SCOOP"), os.environ.get("SCOOP_GLOBAL"),
+             Path.home() / "scoop", Path(os.environ.get("ProgramData", "C:/ProgramData")) / "scoop"]
+    for root in roots:
+        if root and exe.is_relative_to(Path(root).resolve() / "apps" / SCOOP_APP):
+            return True
+
+    # Custom Scoop root
+    parents = exe.parents
+    return (len(parents) > 3 and parents[1].name.lower() == SCOOP_APP and parents[2].name.lower() == "apps"
+            and (parents[3] / "shims").is_dir())
 
 
 def get_dist():
@@ -18,6 +32,8 @@ def get_dist():
         exe = get_exe()
         if exe == WINGET_PATH / exe.name:
             return "winget"
+        if is_scoop(exe):
+            return "scoop"
         return "standalone"
     return "python"
 
@@ -29,6 +45,8 @@ def get_update_info(manager):
         return "Run with '--update' to perform a self-update."
     elif manager == "winget":
         return "Update with 'winget upgrade armaqdl'."
+    elif manager == "scoop":
+        return f"Update with 'scoop update {SCOOP_APP}'."
     return ""
 
 

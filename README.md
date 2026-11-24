@@ -27,10 +27,10 @@ Through easily-identifiable preset locations, this program can provide a fast an
 ## Installation
 
 ArmaQDL is distributed on [PyPI](https://pypi.org/) as well as a Standalone executable (Windows only).
-- Use [WinGet (recommended)](#winget-(recommended)) or [Standalone](#standalone) if you are on Windows and don't have Python installed.
+- Use [WinGet (recommended)](#winget-(recommended)), [Scoop](#scoop) or [Standalone](#standalone) if you are on Windows and don't have Python installed.
 - Use [PyPI](#pypi) if you have Python installed or are not using Windows.
 
-PyPI provides easier updating of ArmaQDL, while Standalone requires manual updates.
+WinGet, Scoop and PyPI provide easier updating of ArmaQDL, while Standalone requires manual updates (or self-update with `--update`).
 
 #### WinGet (recommended)
 
@@ -39,6 +39,17 @@ Open Command Prompt, PowerShell or any other terminal application and install Ar
 ```sh
 $ winget install armaqdl
 ```
+
+#### Scoop
+
+This repository is a [Scoop](https://scoop.sh/) bucket. Add it and install ArmaQDL.
+
+```sh
+$ scoop bucket add armaqdl https://github.com/jonpas/ArmaQDL
+$ scoop install armaqdl/armaqdl
+```
+
+Update with `scoop update armaqdl`.
 
 #### Standalone
 
@@ -61,7 +72,7 @@ _Note: Add pip installation directory to `PATH` environmental variable to use it
 Open Command Prompt, PowerShell or any other terminal application, and run ArmaQDL once to generate the configuration files (this will not launch Arma).
 
 ```sh
-# WinGet / CMD / PyPI if in PATH
+# WinGet / Scoop / CMD / PyPI if in PATH
 $ armaqdl
 
 # PyPI as a Python module
