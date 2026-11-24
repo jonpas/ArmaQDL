@@ -26,6 +26,7 @@ jobs:
           token: ${{ secrets.WINGET_TOKEN }} # Classic Personal Access Token with [public_repo, workflow] scopes
 
   publish-scoop:
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     environment: scoop
     permissions:
