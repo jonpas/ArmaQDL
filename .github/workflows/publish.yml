@@ -27,6 +27,7 @@ jobs:
 
   publish-scoop:
     runs-on: ubuntu-latest
+    environment: scoop
     permissions:
       contents: write  # Push updated manifest to default branch
     env:
