@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/ArmaQDL.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ArmaQDL)
 [![PyPI Python](https://img.shields.io/pypi/pyversions/ArmaQDL.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ArmaQDL)
 [![winstall](https://img.shields.io/badge/WinGet-lightblue.svg)](https://winstall.app/apps/jonpas.ArmaQDL)
-[![Scoop](https://img.shields.io/badge/Scoop-lightblue.svg)](https://scoop.sh/#/apps?q=bluescreenview)
+[![Scoop](https://img.shields.io/badge/Scoop-lightblue.svg)](https://scoop.sh/#/apps?q=armaqdl)
 
 Quick launching various mod development configurations for Arma through a simple CLI.
 
