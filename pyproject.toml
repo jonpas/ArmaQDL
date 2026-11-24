@@ -10,22 +10,21 @@ authors = [
 description = "Python program for quick launching various mod development configurations for Arma through a simple CLI."
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
   "Environment :: Console",
   "Intended Audience :: Developers",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "License :: OSI Approved :: MIT License",
   "Operating System :: Microsoft :: Windows",
   "Topic :: Software Development :: Build Tools",
 ]
 dependencies = [
   "platformdirs",
-  "toml",
 ]
 dynamic = [
   "version",

@@ -8,7 +8,6 @@ import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import PureWindowsPath
-from typing import Optional
 
 LOCATION = "foxy"
 
@@ -30,7 +29,7 @@ class FoxyError(Exception):
 class FoxyMod:
     repo: str
     name: str
-    path: Optional[str]  # None for Creator DLC codes
+    path: str | None  # None for Creator DLC codes
 
     @property
     def is_dlc(self):
