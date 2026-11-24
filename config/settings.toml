@@ -43,6 +43,23 @@ profile = "Dev"
     presence = "Makefile"
     command = ["make", "-j4"]
 
+# Foxy repositories used with CLI as `foxy:repo` (expands to the repository's resolved mods)
+# Mods of the repository can be filtered or skipped with `foxy:repo\@mod` and `foxy:repo\@mod:s` (glob patterns supported)
+[foxy]
+  # Foxy CLI invocation (use full path to Foxy executable if not in PATH)
+  command = ["foxy"]
+  # Foxy config directory override (leave unset for Foxy's default)
+  # config_dir = "C:/Users/Me/AppData/Roaming/Foxy"
+  # Include Creator DLC codes (eg. `gm`) the repository's selected profile enables
+  include_dlc = true
+  # Warn about enabled repository addons Foxy could not find on disk
+  check_missing = true
+
+  # Short aliases for repositories, values are repository names or URLs (http/https)
+  [foxy.aliases]
+    # ops = "My Unit Operations"
+    # training = "https://example.com/repo/training/"
+
 [log]
   open_delay = 3
 

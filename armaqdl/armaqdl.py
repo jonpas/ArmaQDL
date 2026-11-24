@@ -13,7 +13,7 @@ if os.name == "nt":
 
 from ._version import __version__
 from .const import PACKAGE
-from . import config, update
+from . import config, foxy, update
 
 
 VERBOSE = False
@@ -123,9 +123,46 @@ def process_mods(mods, build_dev_tool):
         print(f"Process mods: {mods}")
 
     paths, skips = [], []
+    dlcs, foxy_skips = [], set()
     ignores, opts = 0, 0
+    foxy_settings = SETTINGS.get("foxy", {})
 
     for i, mod in enumerate(mods):
+        # Foxy repository mod (added by Foxy repository expansion)
+        if isinstance(mod, foxy.FoxyMod):
+            if mod in foxy_skips or (not mod.is_dlc and Path(mod.path) in skips):
+                print(f"(skip) foxy:{mod.repo}\\{mod.name}")
+                ignores += 1
+                continue
+
+            if mod.is_dlc:
+                if not foxy_settings.get("include_dlc", True):
+                    if VERBOSE:
+                        print(f"foxy:{mod.repo}\\{mod.name}  [Creator DLC]\n=> Skip (include_dlc disabled)")
+                    ignores += 1
+                elif mod.name in dlcs:
+                    ignores += 1
+                else:
+                    print(f"foxy:{mod.repo}\\{mod.name}  [Creator DLC]")
+                    dlcs.append(mod.name)
+                continue
+
+            path = Path(mod.path)
+            if path in paths:
+                # Same mod from multiple Foxy repositories (eg. repository space shared folder)
+                if VERBOSE:
+                    print(f"(duplicate) foxy:{mod.repo}\\{mod.name}  [{path}]")
+                ignores += 1
+                continue
+
+            if not path.exists():
+                print(f"Invalid mod path: {path}  [foxy:{mod.repo}\\{mod.name}]")
+                continue
+
+            print(f"foxy:{mod.repo}\\{mod.name}  [{path}]")
+            paths.append(path)
+            continue
+
         location = "abs"  # Default if not specified
         marks = []
 
@@ -138,6 +175,41 @@ def process_mods(mods, build_dev_tool):
             location, mod, marks = cli_mod.split(":", 2)
             marks = marks.split(":")
             marks = [x.lower() for x in marks]
+
+        # Foxy repository (unless 'foxy' is defined as a regular location)
+        if location == foxy.LOCATION and location not in SETTINGS.get("locations", {}).keys():
+            repo, pattern = foxy.parse_spec(mod)
+            skip = "s" in marks or "skip" in marks
+
+            unsupported = [x for x in marks if x not in ("s", "skip")]
+            if unsupported:
+                print(f"Warning! Unsupported marks for Foxy repository ignored: {':'.join(unsupported)}  [{location}:{mod}]")
+
+            try:
+                repo_mods = foxy.resolve(repo, foxy_settings, verbose=VERBOSE)
+            except foxy.FoxyError as e:
+                print(f"Error! {e}  [{location}:{mod}]")
+                continue
+
+            matched = foxy.match(repo_mods, pattern)
+
+            if skip:
+                if not matched:
+                    print(f"Warning! Skip matched no mods in Foxy repository: {location}:{mod}")
+                elif VERBOSE:
+                    print(f"{location}:{mod}\n=> Skip in Foxy repository: {', '.join(x.name for x in matched)}")
+                foxy_skips.update(matched)
+                ignores += 1
+                continue
+
+            if not matched:
+                print(f"No mods matched in Foxy repository: {location}:{mod}")
+                continue
+
+            # Add to the end (after skips)
+            mods.extend(matched)
+            ignores += 1
+            continue
 
         if location not in SETTINGS.get("locations", {}).keys():
             # Absolute path
@@ -262,14 +334,14 @@ def process_mods(mods, build_dev_tool):
 
     # Some mods are invalid (return at the end to show all invalid locations/paths)
     if VERBOSE:
-        print(f"Paths: {len(paths)} processed vs. {len(mods) + opts - ignores} input ({len(mods) + opts} mods - {ignores} ignores)")
+        print(f"Paths: {len(paths) + len(dlcs)} processed vs. {len(mods) + opts - ignores} input ({len(mods) + opts} mods - {ignores} ignores)")
 
-    if len(paths) != len(mods) + opts - ignores:
+    if len(paths) + len(dlcs) != len(mods) + opts - ignores:
         return None
 
-    print(f"Total mods: {len(paths)}\n")
+    print(f"Total mods: {len(paths) + len(dlcs)}\n")
 
-    return f"-mod={';'.join([str(x) for x in paths])}"
+    return f"-mod={';'.join(dlcs + [str(x) for x in paths])}"
 
 
 def process_mission(mission, profile):
@@ -442,7 +514,8 @@ def main():
         description=f"Quick development Arma 3 launcher v{__version__}",
         formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]][:o[opts]] ...", type=str, nargs="*", help="paths to mods or 'none' for no mods")
+    parser.add_argument("mods", metavar="loc:mod[:b[tool]][:s|:skip][:t[type]][:o[opts]] ...", type=str, nargs="*",
+                        help="paths to mods, 'foxy:repo[\\mod][:s]' for Foxy repositories or 'none' for no mods")
     parser.add_argument("-m", "--mission", default="", type=str, help="mission to load")
 
     parser.add_argument("-s", "--server", action="store_true", help="start server")
@@ -506,6 +579,11 @@ def main():
         epilog += "\n\nBuild Tools:"
         for tool in SETTINGS.get("build", {}):
             epilog += f"\n  {tool} ({SETTINGS['build'][tool]['presence']}) => {' '.join(SETTINGS['build'][tool]['command'])}"
+
+        foxy_settings = SETTINGS.get("foxy", {})
+        epilog += f"\n\nFoxy ({foxy.LOCATION}:repo):\n  command => {' '.join(foxy.build_command(foxy_settings, []))}"
+        for alias, target in foxy_settings.get("aliases", {}).items():
+            epilog += f"\n  {alias} => {target}"
 
         print(epilog)
         return 0

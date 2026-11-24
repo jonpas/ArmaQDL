@@ -49,6 +49,16 @@ def validate(settings):
             print(f"Error! No 'command' defined for build tool '{build_tool}'.")
             ok = False
 
+    foxy = settings.get('foxy', {})
+    command = foxy.get('command', ["foxy"])
+    if not isinstance(command, list) or not command or not all(isinstance(x, str) for x in command):
+        print("Error! Foxy 'command' must be a non-empty list of strings.")
+        ok = False
+    for alias, target in foxy.get('aliases', {}).items():
+        if not isinstance(target, str) or not target:
+            print(f"Error! Foxy alias '{alias}' must be a non-empty repository name or URL.")
+            ok = False
+
     if not settings.get('server'):
         print("Error! No '[server]' defined.")
         ok = False

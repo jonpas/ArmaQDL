@@ -18,6 +18,7 @@ Through easily-identifiable preset locations, this program can provide a fast an
 - Select the profile to start with
 - Toggle file patching, script errors, signature check and windowed mode
 - Mod location wildcards (`glob` pattern matching)
+- **Foxy repositories** via Foxy CLI, with replacing individual mods by local builds
 - Easy **dedicated server and headless client launching**
 - Load mission on dedicated server (by manipulating `server.cfg`)
 - Join server
@@ -75,6 +76,14 @@ Settings file can be found in your operating system's standard configuration dir
 - Linux: `~/.config/ArmaQDL/settings.toml`
 
 Settings are in [TOML](https://toml.io/en/) format and can be edited with any text editor.
+
+### Foxy
+
+Mods of [Foxy](https://github.com/YetheSamartaka-Foxy/Foxy) repositories are resolved through Foxy CLI (`foxy --json launch` without `--execute`, which only builds the launch command and never starts the game). Foxy must be installed and the repository synced. Set `command` in the `[foxy]` section of settings if `foxy` is not in `PATH`, and optionally `config_dir` if Foxy uses a non-default config directory.
+
+The repository's selected launch profile in Foxy determines enabled addons, optional addons, external addons and Creator DLCs. Only the `-mod=` list is used from Foxy, all other parameters come from ArmaQDL. Switch the Foxy game space or profile with `foxy game use` and `foxy profile select`.
+
+Repository names can be given short aliases in `[foxy.aliases]`, alias values may also be repository URLs (useful when names contain `:`, `/` or `\`).
 
 ### Dedicated Server
 
@@ -176,6 +185,25 @@ Glob pattern matching may also be used to match multiple optionals.
 ```sh
 $ armaqdl dev:TheseusServices:o@*variants*
 ```
+
+
+**Example 6:** _(Foxy repositories)_
+
+Foxy repository spaces share one folder between multiple repositories, so wildcards over the folder (Example 3) would load mods of all repositories. Use `foxy:` with the repository name (or alias) instead.
+
+Launches Arma with all mods of Foxy repository "My Repo", replacing ACE3 and ACRE2 with local development builds (building ACE3). Skips and filters match mod folder names using glob pattern matching, case-insensitive.
+
+```sh
+$ armaqdl "foxy:My Repo" "foxy:My Repo\@ace:s" "foxy:My Repo\@acre*:s" dev:ace:b dev:acre2
+```
+
+Loads only CBA from the Foxy repository with alias `ops` (Creator DLCs can be skipped the same way, eg. `foxy:ops\gm:s`, or disabled with `include_dlc = false`).
+
+```sh
+$ armaqdl foxy:ops\@cba* dev:ace
+```
+
+Mods shared by multiple given Foxy repositories are loaded once. A regular location named `foxy` in settings takes precedence over Foxy repositories.
 
 
 ## Development
