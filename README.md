@@ -4,6 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/ArmaQDL.svg?logo=pypi&label=PyPI&logoColor=gold)](https://pypi.org/project/ArmaQDL)
 [![PyPI Python](https://img.shields.io/pypi/pyversions/ArmaQDL.svg?logo=python&label=Python&logoColor=gold)](https://pypi.org/project/ArmaQDL)
 [![winstall](https://img.shields.io/badge/WinGet-lightblue.svg)](https://winstall.app/apps/jonpas.ArmaQDL)
+[![Scoop](https://img.shields.io/badge/Scoop-lightblue.svg)](https://scoop.sh/#/apps?q=bluescreenview)
 
 Quick launching various mod development configurations for Arma through a simple CLI.
 
@@ -27,12 +28,12 @@ Through easily-identifiable preset locations, this program can provide a fast an
 ## Installation
 
 ArmaQDL is distributed on [PyPI](https://pypi.org/) as well as a Standalone executable (Windows only).
-- Use [WinGet (recommended)](#winget-(recommended)), [Scoop](#scoop) or [Standalone](#standalone) if you are on Windows and don't have Python installed.
+- Use [Scoop (recommended)](#scoop-(recommended)), [WinGet](#winget) or [Standalone](#standalone) if you are on Windows and don't have Python installed.
 - Use [PyPI](#pypi) if you have Python installed or are not using Windows.
 
 WinGet, Scoop and PyPI provide easier updating of ArmaQDL, while Standalone requires manual updates (or self-update with `--update`).
 
-#### WinGet (recommended)
+#### WinGet
 
 Open Command Prompt, PowerShell or any other terminal application and install ArmaQDL.
 
@@ -40,7 +41,7 @@ Open Command Prompt, PowerShell or any other terminal application and install Ar
 $ winget install armaqdl
 ```
 
-#### Scoop
+#### Scoop (recommended)
 
 This repository is a [Scoop](https://scoop.sh/) bucket. Add it and install ArmaQDL.
 
